@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <future>
 #include <optional>
@@ -111,9 +113,9 @@ void RemoveUnavailableLayers(const vk::InstanceDispatch& dld, std::vector<const 
 }
 } // Anonymous namespace
 
-vk::Instance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceDispatch& dld,
-                            u32 required_version, Core::Frontend::WindowSystemType window_type,
-                            bool enable_validation) {
+VulkanInstance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceDispatch& dld,
+                              u32 required_version, Core::Frontend::WindowSystemType window_type,
+                              bool enable_validation) {
     if (!library.IsOpen()) {
         LOG_ERROR(Render_Vulkan, "Vulkan library not available");
         throw vk::Exception(VK_ERROR_INITIALIZATION_FAILED);
@@ -129,6 +131,10 @@ vk::Instance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceD
     const std::vector<const char*> extensions =
         RequiredExtensions(dld, window_type, enable_validation);
     if (!AreExtensionsSupported(dld, extensions)) {
+        LOG_ERROR(Render_Vulkan, "Required extensions are not supported:");
+        for (const char* extension : extensions) {
+            LOG_ERROR(Render_Vulkan, "  - {}", extension);
+        }
         throw vk::Exception(VK_ERROR_EXTENSION_NOT_PRESENT);
     }
     std::vector<const char*> layers = Layers(enable_validation);
@@ -149,7 +155,7 @@ vk::Instance CreateInstance(const Common::DynamicLibrary& library, vk::InstanceD
         LOG_ERROR(Render_Vulkan, "Failed to load Vulkan instance function pointers");
         throw vk::Exception(VK_ERROR_INITIALIZATION_FAILED);
     }
-    return instance;
+    return VulkanInstance(instance, dld);
 }
 
 } // namespace Vulkan

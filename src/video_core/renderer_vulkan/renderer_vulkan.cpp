@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <algorithm>
 #include <array>
@@ -35,6 +37,7 @@
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_surface.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 namespace Vulkan {
 namespace {
@@ -106,7 +109,9 @@ RendererVulkan::RendererVulkan(Core::Frontend::EmuWindow& emu_window,
       debug_messenger(Settings::values.renderer_debug ? CreateDebugUtilsCallback(instance)
                                                       : vk::DebugUtilsMessenger{}),
       surface(CreateSurface(instance, render_window.GetWindowInfo())),
-      device(CreateDevice(instance, dld, *surface)), memory_allocator(device), state_tracker(),
+      device(CreateDevice(instance, dld, *surface)),
+      memory_allocator(device),
+      state_tracker(),
       scheduler(device, state_tracker),
       swapchain(*surface, device, scheduler, render_window.GetFramebufferLayout().width,
                 render_window.GetFramebufferLayout().height),
@@ -257,10 +262,10 @@ std::vector<u8> RendererVulkan::GetAppletCaptureBuffer() {
 void RendererVulkan::RenderAppletCaptureLayer(
     std::span<const Tegra::FramebufferConfig> framebuffers) {
     if (!applet_frame.image) {
-        applet_frame.image = CreateWrappedImage(memory_allocator, CaptureImageSize, CaptureFormat);
-        applet_frame.image_view = CreateWrappedImageView(device, applet_frame.image, CaptureFormat);
-        applet_frame.framebuffer = blit_applet.CreateFramebuffer(
-            VideoCore::Capture::Layout, *applet_frame.image_view, CaptureFormat);
+        applet_frame.image = std::make_unique<VulkanImage>(device, CaptureImageSize, CaptureFormat);
+        applet_frame.image_view = std::make_unique<VulkanImageView>(device, applet_frame.image->Get(), CaptureFormat);
+        applet_frame.framebuffer = std::make_unique<VulkanFramebuffer>(
+            blit_applet.CreateFramebuffer(VideoCore::Capture::Layout, *applet_frame.image_view, CaptureFormat));
     }
 
     blit_applet.DrawToFrame(rasterizer, &applet_frame, framebuffers, VideoCore::Capture::Layout, 1,

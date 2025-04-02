@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2019 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SDPX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
@@ -9,6 +11,7 @@
 #include "common/common_types.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 VK_DEFINE_HANDLE(VmaAllocator)
 
@@ -91,7 +94,8 @@ public:
      *
      * @throw vk::Exception on failure
      */
-    explicit MemoryAllocator(const Device& device_);
+    explicit MemoryAllocator(const Device& device_)
+        : device(device_), allocator(device_.GetMemoryAllocator()) {}
     ~MemoryAllocator();
 
     MemoryAllocator& operator=(const MemoryAllocator&) = delete;
@@ -99,7 +103,53 @@ public:
 
     vk::Image CreateImage(const VkImageCreateInfo& ci) const;
 
+    VulkanImage CreateImage(const VkImageCreateInfo& ci) const {
+        if (ci.extent.width == 0 || ci.extent.height == 0) {
+            throw std::invalid_argument("Image extent must have non-zero width and height");
+        }
+
+        const VmaAllocationCreateInfo alloc_ci = {
+            .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT,
+            .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
+            .requiredFlags = 0,
+            .preferredFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            .memoryTypeBits = 0,
+            .pool = VK_NULL_HANDLE,
+            .pUserData = nullptr,
+            .priority = 0.f,
+        };
+
+        VkImage handle{};
+        VmaAllocation allocation{};
+        vk::Check(vmaCreateImage(allocator, &ci, &alloc_ci, &handle, &allocation, nullptr));
+
+        return VulkanImage(device, handle, allocation, ci.extent);
+    }
+
     vk::Buffer CreateBuffer(const VkBufferCreateInfo& ci, MemoryUsage usage) const;
+
+    VulkanBuffer CreateBuffer(const VkBufferCreateInfo& ci, MemoryUsage usage) const {
+        if (ci.size == 0) {
+            throw std::invalid_argument("Buffer size must be greater than 0");
+        }
+
+        const VmaAllocationCreateInfo alloc_ci = {
+            .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT | MemoryUsageVmaFlags(usage),
+            .usage = MemoryUsageVma(usage),
+            .requiredFlags = 0,
+            .preferredFlags = MemoryUsagePreferredVmaFlags(usage),
+            .memoryTypeBits = usage == MemoryUsage::Stream ? 0u : valid_memory_types,
+            .pool = VK_NULL_HANDLE,
+            .pUserData = nullptr,
+            .priority = 0.f,
+        };
+
+        VkBuffer handle{};
+        VmaAllocation allocation{};
+        vk::Check(vmaCreateBuffer(allocator, &ci, &alloc_ci, &handle, &allocation, nullptr));
+
+        return VulkanBuffer(device, handle, allocation, ci.size);
+    }
 
     /**
      * Commits a memory with the specified requirements.

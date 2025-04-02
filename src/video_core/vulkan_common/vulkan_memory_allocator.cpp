@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SDPX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <algorithm>
 #include <bit>
@@ -16,6 +18,7 @@
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_memory_allocator.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 namespace Vulkan {
 namespace {
@@ -230,7 +233,11 @@ MemoryAllocator::MemoryAllocator(const Device& device_)
 
 MemoryAllocator::~MemoryAllocator() = default;
 
-vk::Image MemoryAllocator::CreateImage(const VkImageCreateInfo& ci) const {
+VulkanImage MemoryAllocator::CreateImage(const VkImageCreateInfo& ci) const {
+    if (ci.extent.width == 0 || ci.extent.height == 0) {
+        throw std::invalid_argument("Image extent must have non-zero width and height");
+    }
+
     const VmaAllocationCreateInfo alloc_ci = {
         .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT,
         .usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE,
@@ -244,14 +251,16 @@ vk::Image MemoryAllocator::CreateImage(const VkImageCreateInfo& ci) const {
 
     VkImage handle{};
     VmaAllocation allocation{};
-
     vk::Check(vmaCreateImage(allocator, &ci, &alloc_ci, &handle, &allocation, nullptr));
 
-    return vk::Image(handle, ci.usage, *device.GetLogical(), allocator, allocation,
-                     device.GetDispatchLoader());
+    return VulkanImage(device, handle, allocation, ci.extent);
 }
 
-vk::Buffer MemoryAllocator::CreateBuffer(const VkBufferCreateInfo& ci, MemoryUsage usage) const {
+VulkanBuffer MemoryAllocator::CreateBuffer(const VkBufferCreateInfo& ci, MemoryUsage usage) const {
+    if (ci.size == 0) {
+        throw std::invalid_argument("Buffer size must be greater than 0");
+    }
+
     const VmaAllocationCreateInfo alloc_ci = {
         .flags = VMA_ALLOCATION_CREATE_WITHIN_BUDGET_BIT | MemoryUsageVmaFlags(usage),
         .usage = MemoryUsageVma(usage),
@@ -264,19 +273,10 @@ vk::Buffer MemoryAllocator::CreateBuffer(const VkBufferCreateInfo& ci, MemoryUsa
     };
 
     VkBuffer handle{};
-    VmaAllocationInfo alloc_info{};
     VmaAllocation allocation{};
-    VkMemoryPropertyFlags property_flags{};
+    vk::Check(vmaCreateBuffer(allocator, &ci, &alloc_ci, &handle, &allocation, nullptr));
 
-    vk::Check(vmaCreateBuffer(allocator, &ci, &alloc_ci, &handle, &allocation, &alloc_info));
-    vmaGetAllocationMemoryProperties(allocator, allocation, &property_flags);
-
-    u8* data = reinterpret_cast<u8*>(alloc_info.pMappedData);
-    const std::span<u8> mapped_data = data ? std::span<u8>{data, ci.size} : std::span<u8>{};
-    const bool is_coherent = property_flags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-
-    return vk::Buffer(handle, *device.GetLogical(), allocator, allocation, mapped_data, is_coherent,
-                      device.GetDispatchLoader());
+    return VulkanBuffer(device, handle, allocation, ci.size);
 }
 
 MemoryCommit MemoryAllocator::Commit(const VkMemoryRequirements& requirements, MemoryUsage usage) {

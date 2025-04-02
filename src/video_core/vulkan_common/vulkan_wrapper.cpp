@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2020 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <algorithm>
 #include <memory>
@@ -12,6 +14,8 @@
 #include "video_core/vulkan_common/vk_enum_string_helper.h"
 #include "video_core/vulkan_common/vma.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
+#include "video_core/vulkan_common/vulkan_device.h"
 
 namespace Vulkan::vk {
 
@@ -1000,3 +1004,11 @@ std::optional<std::vector<VkLayerProperties>> EnumerateInstanceLayerProperties(
 }
 
 } // namespace Vulkan::vk
+
+VulkanBuffer buffer(device, buffer_size, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+VulkanImage image(device, {width, height}, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+
+void CreateBuffer(const Device& device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties) {
+    VulkanBuffer buffer(device, size, usage, properties);
+    // Use the buffer as needed
+}

@@ -1,5 +1,7 @@
 # SPDX-FileCopyrightText: 2018 yuzu Emulator Project
 # SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2025 EDEN Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 # Enable modules to include each other's files
 include_directories(.)
@@ -192,6 +194,15 @@ add_subdirectory(network)
 add_subdirectory(input_common)
 add_subdirectory(frontend_common)
 add_subdirectory(shader_recompiler)
+
+# Ensure the Vulkan common directory is included
+target_include_directories(video_core PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/video_core/vulkan_common
+)
+
+# Link Vulkan library
+find_package(Vulkan REQUIRED)
+target_link_libraries(video_core PRIVATE Vulkan::Vulkan)
 
 if (YUZU_ROOM)
      add_subdirectory(dedicated_room)

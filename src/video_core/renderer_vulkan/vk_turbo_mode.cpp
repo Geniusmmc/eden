@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2022 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #if defined(ANDROID) && defined(ARCHITECTURE_arm64)
 #include <adrenotools/driver.h>
@@ -11,6 +13,8 @@
 #include "video_core/renderer_vulkan/vk_shader_util.h"
 #include "video_core/renderer_vulkan/vk_turbo_mode.h"
 #include "video_core/vulkan_common/vulkan_device.h"
+#include "video_core/vulkan_common/vulkan_memory_allocator.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 namespace Vulkan {
 
@@ -40,18 +44,14 @@ void TurboMode::Run(std::stop_token stop_token) {
 #ifndef ANDROID
     auto& dld = m_device.GetLogical();
 
-    // Allocate buffer. 2MiB should be sufficient.
+    // Allocate buffer using RAII wrapper
     const VkBufferCreateInfo buffer_ci = {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
         .size = 2_MiB,
         .usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT,
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
-        .queueFamilyIndexCount = 0,
-        .pQueueFamilyIndices = nullptr,
     };
-    vk::Buffer buffer = m_allocator.CreateBuffer(buffer_ci, MemoryUsage::DeviceLocal);
+    VulkanBuffer buffer = m_allocator.CreateBuffer(buffer_ci, MemoryUsage::DeviceLocal);
 
     // Create the descriptor pool to contain our descriptor.
     static constexpr VkDescriptorPoolSize pool_size{
@@ -59,10 +59,9 @@ void TurboMode::Run(std::stop_token stop_token) {
         .descriptorCount = 1,
     };
 
-    auto descriptor_pool = dld.CreateDescriptorPool(VkDescriptorPoolCreateInfo{
+    // Create descriptor pool using RAII wrapper
+    VulkanDescriptorPool descriptor_pool = dld.CreateDescriptorPool(VkDescriptorPoolCreateInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
         .maxSets = 1,
         .poolSizeCount = 1,
         .pPoolSizes = &pool_size,
@@ -77,7 +76,7 @@ void TurboMode::Run(std::stop_token stop_token) {
         .pImmutableSamplers = nullptr,
     };
 
-    auto descriptor_set_layout = dld.CreateDescriptorSetLayout(VkDescriptorSetLayoutCreateInfo{
+    VulkanDescriptorSetLayout descriptor_set_layout = dld.CreateDescriptorSetLayout(VkDescriptorSetLayoutCreateInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -86,7 +85,7 @@ void TurboMode::Run(std::stop_token stop_token) {
     });
 
     // Actually create the descriptor set.
-    auto descriptor_set = descriptor_pool.Allocate(VkDescriptorSetAllocateInfo{
+    VulkanDescriptorSet descriptor_set = descriptor_pool.AllocateDescriptorSet(VkDescriptorSetAllocateInfo{
         .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
         .pNext = nullptr,
         .descriptorPool = *descriptor_pool,
@@ -97,15 +96,11 @@ void TurboMode::Run(std::stop_token stop_token) {
     // Create the shader.
     auto shader = BuildShader(m_device, VULKAN_TURBO_MODE_COMP_SPV);
 
-    // Create the pipeline layout.
-    auto pipeline_layout = dld.CreatePipelineLayout(VkPipelineLayoutCreateInfo{
+    // Create pipeline layout using RAII wrapper
+    VulkanPipelineLayout pipeline_layout = dld.CreatePipelineLayout(VkPipelineLayoutCreateInfo{
         .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
-        .pNext = nullptr,
-        .flags = 0,
         .setLayoutCount = 1,
         .pSetLayouts = descriptor_set_layout.address(),
-        .pushConstantRangeCount = 0,
-        .pPushConstantRanges = nullptr,
     });
 
     // Actually create the pipeline.
@@ -119,7 +114,7 @@ void TurboMode::Run(std::stop_token stop_token) {
         .pSpecializationInfo = nullptr,
     };
 
-    auto pipeline = dld.CreateComputePipeline(VkComputePipelineCreateInfo{
+    VulkanPipeline pipeline = dld.CreateComputePipeline(VkComputePipelineCreateInfo{
         .sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
@@ -130,24 +125,22 @@ void TurboMode::Run(std::stop_token stop_token) {
     });
 
     // Create a fence to wait on.
-    auto fence = dld.CreateFence(VkFenceCreateInfo{
+    VulkanFence fence = dld.CreateFence(VkFenceCreateInfo{
         .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
         .pNext = nullptr,
         .flags = 0,
     });
 
-    // Create a command pool to allocate a command buffer from.
-    auto command_pool = dld.CreateCommandPool(VkCommandPoolCreateInfo{
+    // Create command pool using RAII wrapper
+    VulkanCommandPool command_pool = dld.CreateCommandPool(VkCommandPoolCreateInfo{
         .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
-        .pNext = nullptr,
         .flags =
             VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = m_device.GetGraphicsFamily(),
     });
 
-    // Create a single command buffer.
-    auto cmdbufs = command_pool.Allocate(1, VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-    auto cmdbuf = vk::CommandBuffer{cmdbufs[0], m_device.GetDispatchLoader()};
+    // Allocate command buffer using RAII wrapper
+    VulkanCommandBuffer cmdbuf = command_pool.AllocateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 #endif
 
     while (!stop_token.stop_requested()) {
