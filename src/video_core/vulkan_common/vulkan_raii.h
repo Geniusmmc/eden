@@ -41,7 +41,7 @@ public:
             throw std::runtime_error("Failed to allocate Vulkan buffer memory");
         }
 
-        if (vkBindBufferMemory(device_, buffer_, buffer_memory_, 0) != VK_SUCCESS) {
+        if Vulkan::vk:DeviceDispatch::vkBindBufferMemory(device_, buffer_, buffer_memory_, 0) != VK_SUCCESS) {
             throw std::runtime_error("Failed to bind Vulkan buffer memory");
         }
     }
