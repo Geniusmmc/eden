@@ -1,4 +1,6 @@
-# SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+# SPDX-FileCopyrightText: 2018 yuzu Emulator Project
+# SPDX-License-Identifier: GPL-2.0-or-later
+# SPDX-FileCopyrightText: 2023 EDEN Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 cmake_minimum_required(VERSION 3.22)
@@ -90,9 +92,7 @@ if (ANDROID OR WIN32 OR APPLE)
     # - macOS defaults to the SecureTransport backend.
     # - Android currently has no SSL backend as the NDK doesn't include any SSL
     #   library; a proper 'native' backend would have to go through Java.
-    # But you can force builds for those platforms to use OpenSSL if you have
-    # your own copy of it.
-    set(DEFAULT_ENABLE_OPENSSL OFF)
+        set(DEFAULT_ENABLE_OPENSSL OFF)
 endif()
 option(ENABLE_OPENSSL "Enable OpenSSL backend for ISslConnection" ${DEFAULT_ENABLE_OPENSSL})
 
@@ -651,3 +651,8 @@ if(ENABLE_QT AND UNIX AND NOT APPLE)
     install(FILES "dist/org.yuzu_emu.yuzu.metainfo.xml"
             DESTINATION "share/metainfo")
 endif()
+
+target_include_directories(video_core PRIVATE
+    ${CMAKE_SOURCE_DIR}/src/video_core/vulkan_common
+)
+target_link_libraries(video_core PRIVATE Vulkan::Vulkan)

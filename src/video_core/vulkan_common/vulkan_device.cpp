@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #include <algorithm>
 #include <bitset>
@@ -18,6 +20,7 @@
 #include "video_core/vulkan_common/vma.h"
 #include "video_core/vulkan_common/vulkan_device.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 #if defined(ANDROID) && defined(ARCHITECTURE_arm64)
 #include <adrenotools/bcenabler.h>
@@ -724,11 +727,10 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         dynamic_state3_enables = false;
     }
 
-    logical = vk::Device::Create(physical, queue_cis, ExtensionListForVulkan(loaded_extensions),
-                                 first_next, dld);
-
-    graphics_queue = logical.GetQueue(graphics_family);
-    present_queue = logical.GetQueue(present_family);
+    VulkanLogicalDevice logical_device(physical, queue_cis, ExtensionListForVulkan(loaded_extensions),
+                                       first_next, dld);
+    graphics_queue = logical_device.Get().GetQueue(graphics_family);
+    present_queue = logical_device.Get().GetQueue(present_family);
 
     VmaVulkanFunctions functions{};
     functions.vkGetInstanceProcAddr = dld.vkGetInstanceProcAddr;
@@ -748,11 +750,11 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         .pTypeExternalMemoryHandleTypes = nullptr,
     };
 
-    vk::Check(vmaCreateAllocator(&allocator_info, &allocator));
+    VulkanMemoryAllocator memory_allocator(allocator_info);
 }
 
 Device::~Device() {
-    vmaDestroyAllocator(allocator);
+    vmaDestroyAllocator(memory_allocator.Get());
 }
 
 VkFormat Device::GetSupportedFormat(VkFormat wanted_format, VkFormatFeatureFlags wanted_usage,

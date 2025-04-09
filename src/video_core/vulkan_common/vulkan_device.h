@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: Copyright 2018 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
+// // SPDX-FileCopyrightText: Copyright 2025 EDEN Emulator Project
+// // SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
@@ -13,6 +15,7 @@
 #include "common/logging/log.h"
 #include "common/settings.h"
 #include "video_core/vulkan_common/vulkan_wrapper.h"
+#include "video_core/vulkan_common/vulkan_raii.h"
 
 VK_DEFINE_HANDLE(VmaAllocator)
 
@@ -191,8 +194,76 @@ enum class NvidiaArchitecture {
 class Device {
 public:
     explicit Device(VkInstance instance, vk::PhysicalDevice physical, VkSurfaceKHR surface,
-                    const vk::InstanceDispatch& dld);
-    ~Device();
+                    const vk::InstanceDispatch& dld)
+        : instance(instance), physical(physical), dld(dld) {
+        // Create logical device
+        VkDeviceCreateInfo device_info = {};
+        // ... populate device_info ...
+        if (vkCreateDevice(physical, &device_info, nullptr, &logical) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create Vulkan logical device");
+        }
+
+        // Create memory allocator
+        VmaAllocatorCreateInfo allocator_info = {};
+        allocator_info.physicalDevice = physical;
+        allocator_info.device = logical;
+        allocator_info.instance = instance;
+        if (vmaCreateAllocator(&allocator_info, &allocator) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create Vulkan memory allocator");
+        }
+    }
+
+    ~Device() {
+        if (allocator) {
+            vmaDestroyAllocator(allocator);
+        }
+        if (logical) {
+            vkDestroyDevice(logical, nullptr);
+        }
+    }
+
+    // Move constructor
+    Device(Device&& other) noexcept
+        : instance(other.instance),
+          allocator(other.allocator),
+          dld(std::move(other.dld)),
+          physical(other.physical),
+          logical(other.logical),
+          graphics_queue(other.graphics_queue),
+          present_queue(other.present_queue) {
+        other.allocator = nullptr;
+        other.logical = nullptr;
+    }
+
+    // Move assignment operator
+    Device& operator=(Device&& other) noexcept {
+        if (this != &other) {
+            // Clean up existing resources
+            if (allocator) {
+                vmaDestroyAllocator(allocator);
+            }
+            if (logical) {
+                vkDestroyDevice(logical, nullptr);
+            }
+
+            // Transfer ownership
+            instance = other.instance;
+            allocator = other.allocator;
+            dld = std::move(other.dld);
+            physical = other.physical;
+            logical = other.logical;
+            graphics_queue = other.graphics_queue;
+            present_queue = other.present_queue;
+
+            other.allocator = nullptr;
+            other.logical = nullptr;
+        }
+        return *this;
+    }
+
+    // Deleted copy constructor and assignment operator
+    Device(const Device&) = delete;
+    Device& operator=(const Device&) = delete;
 
     /**
      * Returns a format supported by the device for the passed requirements.
@@ -744,10 +815,10 @@ private:
 
 private:
     VkInstance instance;         ///< Vulkan instance.
-    VmaAllocator allocator;      ///< VMA allocator.
+    VmaAllocator allocator = nullptr;      ///< VMA allocator.
     vk::DeviceDispatch dld;      ///< Device function pointers.
     vk::PhysicalDevice physical; ///< Physical device.
-    vk::Device logical;          ///< Logical device.
+    vk::Device logical = nullptr;          ///< Logical device.
     vk::Queue graphics_queue;    ///< Main graphics queue.
     vk::Queue present_queue;     ///< Main present queue.
     u32 instance_version{};      ///< Vulkan instance version.
