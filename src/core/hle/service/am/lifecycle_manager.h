@@ -42,6 +42,7 @@ public:
 public:
     Event& GetSystemEvent();
     Event& GetOperationModeChangedSystemEvent();
+    Event& GetHDCPStateChangedEvent();
 
 public:
     bool IsApplication() {
