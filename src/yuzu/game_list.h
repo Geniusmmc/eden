@@ -172,6 +172,9 @@ private:
     QFileSystemWatcher* watcher = nullptr;
     ControllerNavigation* controller_navigation = nullptr;
     CompatibilityList compatibility_list;
+    QHBoxLayout* warning_layout = nullptr;
+    QWidget* warning_widget = nullptr;
+    QLabel* deprecated_3ds_warning = nullptr;
 
     friend class GameListSearchField;
 
