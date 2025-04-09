@@ -92,13 +92,13 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_TOOLCHAIN_FILE="%CD%\..\CMakeModules\MSVCCache.cmake" -DYUZU_USE_BUNDLED_QT=ON -DENABLE_QT_TRANSLATION=ON -DUSE_DISCORD_PRESENCE=ON -DYUZU_USE_BUNDLED_VCPKG=ON -DYUZU_USE_BUNDLED_SDL2=ON -DUSE_CCACHE=ON
+          cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_TOOLCHAIN_FILE="%CD%\..\CMakeModules\MSVCCache.cmake" -DEDEN_USE_BUNDLED_QT=ON -DENABLE_QT_TRANSLATION=ON -DUSE_DISCORD_PRESENCE=ON -DEDEN_USE_BUNDLED_VCPKG=ON -DEDEN_USE_BUNDLED_SDL2=ON -DUSE_CCACHE=ON
       - name: Build
         id: build
         shell: cmd
         run: |
           cd build
-          ninja yuzu yuzu-cmd yuzu-room tests
+          ninja eden eden-cmd eden-room tests
           ccache -s -v        
       - name: Package artifacts
         if: steps.build.outcome == 'success'

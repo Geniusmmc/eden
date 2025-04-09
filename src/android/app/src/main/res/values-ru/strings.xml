@@ -189,7 +189,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Ранний доступ</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">Преимущества раннего доступа</string>
     <string name="cutting_edge_features">Новейшие возможности</string>
     <string name="early_access_updates">Ранний доступ к обновлениям</string>

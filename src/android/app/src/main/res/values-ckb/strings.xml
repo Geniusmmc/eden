@@ -112,7 +112,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">بەزوویی دەسپێگەشتن</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">سوودەکانی بەزوویی دەسپێگەشتن</string>
     <string name="cutting_edge_features">تایبەتمەندییە پێشکەوتووەکان</string>
     <string name="early_access_updates">زوو دەستگەیشتن بە نوێکارییەکان</string>

@@ -5,7 +5,7 @@
 
 // yuzu data directories
 
-#define YUZU_DIR "yuzu"
+#define EDEN_DIR "yuzu"
 #define PORTABLE_DIR "user"
 
 // Sub-directories contained within a yuzu data directory

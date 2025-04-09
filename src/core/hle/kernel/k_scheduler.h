@@ -33,8 +33,8 @@ class KScopedSchedulerLockAndSleep;
 
 class KScheduler final {
 public:
-    YUZU_NON_COPYABLE(KScheduler);
-    YUZU_NON_MOVEABLE(KScheduler);
+    EDEN_NON_COPYABLE(KScheduler);
+    EDEN_NON_MOVEABLE(KScheduler);
 
     using LockType = KAbstractSchedulerLock<KScheduler>;
 

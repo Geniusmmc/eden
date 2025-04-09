@@ -100,7 +100,7 @@
     <string name="website_link">https://yuzu-emu.org/</string>
     <string name="github_link">https://github.com/yuzu-emu</string>
 
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="no_manual_installation">Žádná manuální instalace</string>
     <string name="prioritized_support">Prioritní podpora</string>
     <string name="our_eternal_gratitude">Naše věčná vděčnost</string>

@@ -52,19 +52,19 @@ create_appimage() {
   
   strip -s "${app_dir}/usr/bin/${binary_name}"
   
-  cat > "${app_dir}/org.yuzu_emu.${binary_name}.desktop" << EOL
+  cat > "${app_dir}/org.eden_emu.${binary_name}.desktop" << EOL
 [Desktop Entry]
 Type=Application
 Name=${display_name}
-Icon=org.yuzu_emu.${binary_name}
+Icon=org.eden_emu.${binary_name}
 Exec=${binary_name}
 Categories=Game;Emulator;
 EOL
   
-  cp "${app_dir}/org.yuzu_emu.${binary_name}.desktop" "${app_dir}/usr/share/applications/"
+  cp "${app_dir}/org.eden_emu.${binary_name}.desktop" "${app_dir}/usr/share/applications/"
   
-  cp "dist/yuzu.svg" "${app_dir}/org.yuzu_emu.${binary_name}.svg"
-  cp "dist/yuzu.svg" "${app_dir}/usr/share/icons/hicolor/scalable/apps/org.yuzu_emu.${binary_name}.svg"
+  cp "dist/eden.svg" "${app_dir}/org.eden_emu.${binary_name}.svg"
+  cp "dist/eden.svg" "${app_dir}/usr/share/icons/hicolor/scalable/apps/org.eden_emu.${binary_name}.svg"
   
   cd build
   wget -nc https://raw.githubusercontent.com/eden-emulator/ext-linux-bin/main/appimage/deploy-linux.sh || echo "Failed to download deploy script"

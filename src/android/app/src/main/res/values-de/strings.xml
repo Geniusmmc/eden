@@ -137,7 +137,7 @@ Wirklich fortfahren?</string>
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Early Access</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">Early Access Vorteile</string>
     <string name="cutting_edge_features">Neueste Features</string>
     <string name="early_access_updates">Früherer Zugriff auf Updates</string>

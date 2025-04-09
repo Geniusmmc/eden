@@ -13,8 +13,8 @@
 namespace FileSys {
 
 class AesXtsStorage : public IReadOnlyStorage {
-    YUZU_NON_COPYABLE(AesXtsStorage);
-    YUZU_NON_MOVEABLE(AesXtsStorage);
+    EDEN_NON_COPYABLE(AesXtsStorage);
+    EDEN_NON_MOVEABLE(AesXtsStorage);
 
 public:
     static constexpr size_t AesBlockSize = 0x10;

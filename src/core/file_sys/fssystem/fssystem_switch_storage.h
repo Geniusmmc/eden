@@ -8,8 +8,8 @@
 namespace FileSys {
 
 class RegionSwitchStorage : public IReadOnlyStorage {
-    YUZU_NON_COPYABLE(RegionSwitchStorage);
-    YUZU_NON_MOVEABLE(RegionSwitchStorage);
+    EDEN_NON_COPYABLE(RegionSwitchStorage);
+    EDEN_NON_MOVEABLE(RegionSwitchStorage);
 
 public:
     struct Region {

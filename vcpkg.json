@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "yuzu",
+    "name": "eden",
     "builtin-baseline": "ea2a964f9303270322cf3f2d51c265ba146c422d",
     "version": "1.0",
     "dependencies": [
@@ -29,7 +29,7 @@
         "zstd"
     ],
     "features": {
-        "yuzu-tests": {
+        "eden-tests": {
             "description": "Compile tests",
             "dependencies": [ "catch2" ]
         },

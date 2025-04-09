@@ -1,9 +1,9 @@
-# SPDX-FileCopyrightText: Copyright yuzu/Citra Emulator Project / Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright eden/Citra Emulator Project / Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 cmake_minimum_required(VERSION 3.22)
 
-project(yuzu)
+project(eden)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/externals/cmake-modules")
@@ -26,9 +26,9 @@ endif()
 
 # Set bundled sdl2/qt as dependent options.
 option(ENABLE_SDL2 "Enable the SDL2 frontend" ON)
-CMAKE_DEPENDENT_OPTION(YUZU_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "ENABLE_SDL2;MSVC" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_USE_BUNDLED_SDL2 "Download bundled SDL2 binaries" ON "ENABLE_SDL2;MSVC" OFF)
 # On Linux system SDL2 is likely to be lacking HIDAPI support which have drawbacks but is needed for SDL motion
-CMAKE_DEPENDENT_OPTION(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" ON "ENABLE_SDL2;NOT MSVC" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_USE_EXTERNAL_SDL2 "Compile external SDL2" ON "ENABLE_SDL2;NOT MSVC" OFF)
 
 cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "NOT ANDROID" OFF)
 
@@ -37,45 +37,45 @@ mark_as_advanced(FORCE ENABLE_OPENGL)
 option(ENABLE_QT "Enable the Qt frontend" ON)
 
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
-CMAKE_DEPENDENT_OPTION(YUZU_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
 
 option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
 
-option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
+option(EDEN_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" "${WIN32}")
 
-option(YUZU_USE_EXTERNAL_VULKAN_HEADERS "Use Vulkan-Headers from externals" ON)
+option(EDEN_USE_EXTERNAL_VULKAN_HEADERS "Use Vulkan-Headers from externals" ON)
 
-option(YUZU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES "Use Vulkan-Utility-Libraries from externals" ON)
+option(EDEN_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES "Use Vulkan-Utility-Libraries from externals" ON)
 
-option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
+option(EDEN_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
 
-option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+option(EDEN_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
 
 option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
 
 option(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF)
 
-option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
+option(EDEN_TESTS "Compile tests" "${BUILD_TESTING}")
 
-option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(EDEN_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 
-option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
+option(EDEN_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
 
-CMAKE_DEPENDENT_OPTION(YUZU_ROOM "Compile LDN room server" ON "NOT ANDROID" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_ROOM "Compile LDN room server" ON "NOT ANDROID" OFF)
 
-CMAKE_DEPENDENT_OPTION(YUZU_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
 
-option(YUZU_USE_BUNDLED_VCPKG "Use vcpkg for yuzu dependencies" "${MSVC}")
+option(EDEN_USE_BUNDLED_VCPKG "Use vcpkg for eden dependencies" "${MSVC}")
 
-option(YUZU_CHECK_SUBMODULES "Check if submodules are present" ON)
+option(EDEN_CHECK_SUBMODULES "Check if submodules are present" ON)
 
-option(YUZU_ENABLE_LTO "Enable link-time optimization" OFF)
+option(EDEN_ENABLE_LTO "Enable link-time optimization" OFF)
 
-option(YUZU_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" OFF)
+option(EDEN_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" OFF)
 
-option(YUZU_ENABLE_PORTABLE "Allow yuzu to enable portable mode if a user folder is found in the CWD" ON)
+option(EDEN_ENABLE_PORTABLE "Allow eden to enable portable mode if a user folder is found in the CWD" ON)
 
-CMAKE_DEPENDENT_OPTION(YUZU_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
+CMAKE_DEPENDENT_OPTION(EDEN_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
 
 CMAKE_DEPENDENT_OPTION(USE_SYSTEM_MOLTENVK "Use the system MoltenVK lib (instead of the bundled one)" OFF "APPLE" OFF)
 
@@ -96,7 +96,7 @@ if (ANDROID OR WIN32 OR APPLE)
 endif()
 option(ENABLE_OPENSSL "Enable OpenSSL backend for ISslConnection" ${DEFAULT_ENABLE_OPENSSL})
 
-if (ANDROID AND YUZU_DOWNLOAD_ANDROID_VVL)
+if (ANDROID AND EDEN_DOWNLOAD_ANDROID_VVL)
     set(vvl_version "sdk-1.3.261.1")
     set(vvl_zip_file "${CMAKE_BINARY_DIR}/externals/vvl-android.zip")
     if (NOT EXISTS "${vvl_zip_file}")
@@ -119,7 +119,7 @@ if (ANDROID)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5) # Workaround for Oboe
 endif()
 
-if (YUZU_USE_BUNDLED_VCPKG)
+if (EDEN_USE_BUNDLED_VCPKG)
     if (ANDROID)
         set(ENV{ANDROID_NDK_HOME} "${ANDROID_NDK}")
         list(APPEND VCPKG_MANIFEST_FEATURES "android")
@@ -153,8 +153,8 @@ if (YUZU_USE_BUNDLED_VCPKG)
         endif()
     endif()
 
-    if (YUZU_TESTS)
-        list(APPEND VCPKG_MANIFEST_FEATURES "yuzu-tests")
+    if (EDEN_TESTS)
+        list(APPEND VCPKG_MANIFEST_FEATURES "eden-tests")
     endif()
     if (ENABLE_WEB_SERVICE)
         list(APPEND VCPKG_MANIFEST_FEATURES "web-service")
@@ -170,16 +170,16 @@ elseif(NOT "$ENV{VCPKG_TOOLCHAIN_FILE}" STREQUAL "")
     include("$ENV{VCPKG_TOOLCHAIN_FILE}")
 endif()
 
-if (YUZU_USE_PRECOMPILED_HEADERS)
+if (EDEN_USE_PRECOMPILED_HEADERS)
     if (MSVC AND CCACHE)
         # buildcache does not properly cache PCH files, leading to compilation errors.
         # See https://github.com/mbitsnbites/buildcache/discussions/230
         message(WARNING "buildcache does not properly support Precompiled Headers. Disabling PCH")
         set(DYNARMIC_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
-        set(YUZU_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
+        set(EDEN_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
     endif()
 endif()
-if (YUZU_USE_PRECOMPILED_HEADERS)
+if (EDEN_USE_PRECOMPILED_HEADERS)
     message(STATUS "Using Precompiled Headers.")
     set(CMAKE_PCH_INSTANTIATE_TEMPLATES ON)
 endif()
@@ -214,7 +214,7 @@ function(check_submodules_present)
     endforeach()
 endfunction()
 
-if(EXISTS ${PROJECT_SOURCE_DIR}/.gitmodules AND YUZU_CHECK_SUBMODULES)
+if(EXISTS ${PROJECT_SOURCE_DIR}/.gitmodules AND EDEN_CHECK_SUBMODULES)
     check_submodules_present()
 endif()
 configure_file(${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.qrc
@@ -226,9 +226,9 @@ if (EXISTS ${PROJECT_SOURCE_DIR}/dist/compatibility_list/compatibility_list.json
                    COPYONLY)
 endif()
 if (ENABLE_COMPATIBILITY_LIST_DOWNLOAD AND NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
-    message(STATUS "Downloading compatibility list for yuzu...")
+    message(STATUS "Downloading compatibility list for eden...")
     file(DOWNLOAD
-        https://api.yuzu-emu.org/gamedb/
+        https://api.eden-emu.org/gamedb/
         "${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json" SHOW_PROGRESS)
 endif()
 if (NOT EXISTS ${PROJECT_BINARY_DIR}/dist/compatibility_list/compatibility_list.json)
@@ -277,7 +277,7 @@ endif()
 message(STATUS "Target architecture: ${ARCHITECTURE}")
 
 if (UNIX)
-    add_definitions(-DYUZU_UNIX=1)
+    add_definitions(-DEDEN_UNIX=1)
 endif()
 
 if (ARCHITECTURE_arm64 AND (ANDROID OR ${CMAKE_SYSTEM_NAME} STREQUAL "Linux"))
@@ -311,11 +311,11 @@ find_package(VulkanMemoryAllocator CONFIG)
 find_package(ZLIB 1.2 REQUIRED)
 find_package(zstd 1.5 REQUIRED)
 
-if (NOT YUZU_USE_EXTERNAL_VULKAN_HEADERS)
+if (NOT EDEN_USE_EXTERNAL_VULKAN_HEADERS)
     find_package(VulkanHeaders 1.3.274 REQUIRED)
 endif()
 
-if (NOT YUZU_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES)
+if (NOT EDEN_USE_EXTERNAL_VULKAN_UTILITY_LIBRARIES)
     find_package(VulkanUtilityLibraries REQUIRED)
 endif()
 
@@ -348,7 +348,7 @@ if (ENABLE_WEB_SERVICE)
     find_package(httplib 0.12 MODULE COMPONENTS OpenSSL)
 endif()
 
-if (YUZU_TESTS)
+if (EDEN_TESTS)
     find_package(Catch2 3.0.1 REQUIRED)
 endif()
 
@@ -365,14 +365,14 @@ if(ENABLE_QT6 AND Qt6_LOCATION)
     list(APPEND CMAKE_PREFIX_PATH "${Qt6_LOCATION}")
 endif()
 
-# find SDL2 exports a bunch of variables that are needed, so its easier to do this outside of the YUZU_find_package
+# find SDL2 exports a bunch of variables that are needed, so its easier to do this outside of the EDEN_find_package
 if (ENABLE_SDL2)
-    if (YUZU_USE_BUNDLED_SDL2)
+    if (EDEN_USE_BUNDLED_SDL2)
         # Detect toolchain and platform
         if ((MSVC_VERSION GREATER_EQUAL 1920) AND ARCHITECTURE_x86_64)
             set(SDL2_VER "SDL2-2.28.2")
         else()
-            message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable YUZU_USE_BUNDLED_SDL2 and provide your own.")
+            message(FATAL_ERROR "No bundled SDL2 binaries for your toolchain. Disable EDEN_USE_BUNDLED_SDL2 and provide your own.")
         endif()
 
         if (DEFINED SDL2_VER)
@@ -387,7 +387,7 @@ if (ENABLE_SDL2)
         add_library(SDL2::SDL2 INTERFACE IMPORTED)
         target_link_libraries(SDL2::SDL2 INTERFACE "${SDL2_LIBRARY}")
         target_include_directories(SDL2::SDL2 INTERFACE "${SDL2_INCLUDE_DIR}")
-    elseif (YUZU_USE_EXTERNAL_SDL2)
+    elseif (EDEN_USE_EXTERNAL_SDL2)
         message(STATUS "Using SDL2 from externals.")
     else()
         find_package(SDL2 2.26.4 REQUIRED)
@@ -430,26 +430,26 @@ if (ENABLE_QT)
     message(STATUS "Using host Qt at ${QT_HOST_PATH}")
 endif()
 
-function(set_yuzu_qt_components)
+function(set_eden_qt_components)
 # Best practice is to ask for all components at once, so they are from the same version
-set(YUZU_QT_COMPONENTS2 Core Widgets Concurrent)
+set(EDEN_QT_COMPONENTS2 Core Widgets Concurrent)
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-list(APPEND YUZU_QT_COMPONENTS2 DBus)
+list(APPEND EDEN_QT_COMPONENTS2 DBus)
 endif()
-if (YUZU_USE_QT_MULTIMEDIA)
-list(APPEND YUZU_QT_COMPONENTS2 Multimedia)
+if (EDEN_USE_QT_MULTIMEDIA)
+list(APPEND EDEN_QT_COMPONENTS2 Multimedia)
     endif()
-    if (YUZU_USE_QT_WEB_ENGINE)
-    list(APPEND YUZU_QT_COMPONENTS2 WebEngineCore WebEngineWidgets)
+    if (EDEN_USE_QT_WEB_ENGINE)
+    list(APPEND EDEN_QT_COMPONENTS2 WebEngineCore WebEngineWidgets)
     endif()
     if (ENABLE_QT_TRANSLATION)
-    list(APPEND YUZU_QT_COMPONENTS2 LinguistTools)
+    list(APPEND EDEN_QT_COMPONENTS2 LinguistTools)
     endif()
     if (USE_DISCORD_PRESENCE)
-    list(APPEND YUZU_QT_COMPONENTS2 Network)
+    list(APPEND EDEN_QT_COMPONENTS2 Network)
     endif()
-    set(YUZU_QT_COMPONENTS ${YUZU_QT_COMPONENTS2} PARENT_SCOPE)
-    endfunction(set_yuzu_qt_components)
+    set(EDEN_QT_COMPONENTS ${EDEN_QT_COMPONENTS2} PARENT_SCOPE)
+    endfunction(set_eden_qt_components)
 
     # List of all FFmpeg components required
     set(FFmpeg_COMPONENTS
@@ -462,20 +462,20 @@ list(APPEND YUZU_QT_COMPONENTS2 Multimedia)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBVA libva)
 endif()
-if (NOT YUZU_USE_BUNDLED_FFMPEG)
+if (NOT EDEN_USE_BUNDLED_FFMPEG)
     # Use system installed FFmpeg
     find_package(FFmpeg 4.3 REQUIRED QUIET COMPONENTS ${FFmpeg_COMPONENTS})
 endif()
 
 if(ENABLE_QT)
-        set_yuzu_qt_components()
-        find_package(Qt6 REQUIRED COMPONENTS ${YUZU_QT_COMPONENTS})
+        set_eden_qt_components()
+        find_package(Qt6 REQUIRED COMPONENTS ${EDEN_QT_COMPONENTS})
         set(QT_MAJOR_VERSION 6)
         # Qt6 sets cxx_std_17 and we need to undo that
         set_target_properties(Qt6::Platform PROPERTIES INTERFACE_COMPILE_FEATURES "")
     endif()
 
-if (WIN32 AND YUZU_CRASH_DUMPS)
+if (WIN32 AND EDEN_CRASH_DUMPS)
     set(BREAKPAD_VER "breakpad-c89f9dd")
     download_bundled_external("breakpad/" ${BREAKPAD_VER} BREAKPAD_PREFIX)
 
@@ -588,7 +588,7 @@ if (MSVC AND CMAKE_GENERATOR STREQUAL "Ninja")
     )
 endif()
 
-if (YUZU_USE_FASTER_LD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if (EDEN_USE_FASTER_LD AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # We will assume that if the compiler is GCC, it will attempt to use ld.bfd by default.
     # Try to pick a faster linker.
     find_program(LLD lld)
@@ -624,11 +624,11 @@ endif()
 
 add_subdirectory(src)
 
-# Set yuzu project or yuzu-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
+# Set eden project or eden-cmd project as default StartUp Project in Visual Studio depending on whether QT is enabled or not
 if(ENABLE_QT)
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT yuzu)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT eden)
 else()
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT yuzu-cmd)
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT eden-cmd)
 endif()
 
 
@@ -641,13 +641,13 @@ endif()
 # https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html
 # https://www.freedesktop.org/software/appstream/docs/
 if(ENABLE_QT AND UNIX AND NOT APPLE)
-    install(FILES "dist/org.yuzu_emu.yuzu.desktop"
+    install(FILES "dist/org.eden_emu.eden.desktop"
             DESTINATION "share/applications")
-    install(FILES "dist/yuzu.svg"
+    install(FILES "dist/eden.svg"
             DESTINATION "share/icons/hicolor/scalable/apps"
-            RENAME "org.yuzu_emu.yuzu.svg")
-    install(FILES "dist/org.yuzu_emu.yuzu.xml"
+            RENAME "org.eden_emu.eden.svg")
+    install(FILES "dist/org.eden_emu.eden.xml"
             DESTINATION "share/mime/packages")
-    install(FILES "dist/org.yuzu_emu.yuzu.metainfo.xml"
+    install(FILES "dist/org.eden_emu.eden.metainfo.xml"
             DESTINATION "share/metainfo")
 endif()
