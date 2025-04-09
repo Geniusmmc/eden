@@ -8,8 +8,8 @@
 namespace FileSys {
 
 class SparseStorage : public IndirectStorage {
-    YUZU_NON_COPYABLE(SparseStorage);
-    YUZU_NON_MOVEABLE(SparseStorage);
+    EDEN_NON_COPYABLE(SparseStorage);
+    EDEN_NON_MOVEABLE(SparseStorage);
 
 private:
     class ZeroStorage : public IReadOnlyStorage {

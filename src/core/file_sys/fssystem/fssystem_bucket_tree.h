@@ -18,8 +18,8 @@ namespace FileSys {
 using namespace Common::Literals;
 
 class BucketTree {
-    YUZU_NON_COPYABLE(BucketTree);
-    YUZU_NON_MOVEABLE(BucketTree);
+    EDEN_NON_COPYABLE(BucketTree);
+    EDEN_NON_MOVEABLE(BucketTree);
 
 public:
     static constexpr u32 Magic = Common::MakeMagic('B', 'K', 'T', 'R');
@@ -123,7 +123,7 @@ public:
 
 private:
     class NodeBuffer {
-        YUZU_NON_COPYABLE(NodeBuffer);
+        EDEN_NON_COPYABLE(NodeBuffer);
 
     public:
         NodeBuffer() : m_header() {}
@@ -330,8 +330,8 @@ private:
 };
 
 class BucketTree::Visitor {
-    YUZU_NON_COPYABLE(Visitor);
-    YUZU_NON_MOVEABLE(Visitor);
+    EDEN_NON_COPYABLE(Visitor);
+    EDEN_NON_MOVEABLE(Visitor);
 
 public:
     constexpr Visitor()

@@ -12,7 +12,7 @@
 #include "core/internal_network/socket_proxy.h"
 #include "network/network.h"
 
-#if YUZU_UNIX
+#if EDEN_UNIX
 #include <sys/socket.h>
 #endif
 

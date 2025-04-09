@@ -12,7 +12,7 @@ namespace OpenGL {
 
 class OGLRenderbuffer final {
 public:
-    YUZU_NON_COPYABLE(OGLRenderbuffer);
+    EDEN_NON_COPYABLE(OGLRenderbuffer);
 
     OGLRenderbuffer() = default;
 
@@ -39,7 +39,7 @@ public:
 
 class OGLTexture final {
 public:
-    YUZU_NON_COPYABLE(OGLTexture);
+    EDEN_NON_COPYABLE(OGLTexture);
 
     OGLTexture() = default;
 
@@ -66,7 +66,7 @@ public:
 
 class OGLTextureView final {
 public:
-    YUZU_NON_COPYABLE(OGLTextureView);
+    EDEN_NON_COPYABLE(OGLTextureView);
 
     OGLTextureView() = default;
 
@@ -93,7 +93,7 @@ public:
 
 class OGLSampler final {
 public:
-    YUZU_NON_COPYABLE(OGLSampler);
+    EDEN_NON_COPYABLE(OGLSampler);
 
     OGLSampler() = default;
 
@@ -120,7 +120,7 @@ public:
 
 class OGLShader final {
 public:
-    YUZU_NON_COPYABLE(OGLShader);
+    EDEN_NON_COPYABLE(OGLShader);
 
     OGLShader() = default;
 
@@ -143,7 +143,7 @@ public:
 
 class OGLProgram final {
 public:
-    YUZU_NON_COPYABLE(OGLProgram);
+    EDEN_NON_COPYABLE(OGLProgram);
 
     OGLProgram() = default;
 
@@ -167,7 +167,7 @@ public:
 
 class OGLAssemblyProgram final {
 public:
-    YUZU_NON_COPYABLE(OGLAssemblyProgram);
+    EDEN_NON_COPYABLE(OGLAssemblyProgram);
 
     OGLAssemblyProgram() = default;
 
@@ -191,7 +191,7 @@ public:
 
 class OGLPipeline final {
 public:
-    YUZU_NON_COPYABLE(OGLPipeline);
+    EDEN_NON_COPYABLE(OGLPipeline);
 
     OGLPipeline() = default;
     OGLPipeline(OGLPipeline&& o) noexcept : handle{std::exchange<GLuint>(o.handle, 0)} {}
@@ -215,7 +215,7 @@ public:
 
 class OGLBuffer final {
 public:
-    YUZU_NON_COPYABLE(OGLBuffer);
+    EDEN_NON_COPYABLE(OGLBuffer);
 
     OGLBuffer() = default;
 
@@ -242,7 +242,7 @@ public:
 
 class OGLSync final {
 public:
-    YUZU_NON_COPYABLE(OGLSync);
+    EDEN_NON_COPYABLE(OGLSync);
 
     OGLSync() = default;
 
@@ -271,7 +271,7 @@ public:
 
 class OGLFramebuffer final {
 public:
-    YUZU_NON_COPYABLE(OGLFramebuffer);
+    EDEN_NON_COPYABLE(OGLFramebuffer);
 
     OGLFramebuffer() = default;
 
@@ -298,7 +298,7 @@ public:
 
 class OGLQuery final {
 public:
-    YUZU_NON_COPYABLE(OGLQuery);
+    EDEN_NON_COPYABLE(OGLQuery);
 
     OGLQuery() = default;
 
@@ -325,7 +325,7 @@ public:
 
 class OGLTransformFeedback final {
 public:
-    YUZU_NON_COPYABLE(OGLTransformFeedback);
+    EDEN_NON_COPYABLE(OGLTransformFeedback);
 
     OGLTransformFeedback() = default;
 

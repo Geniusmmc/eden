@@ -80,8 +80,8 @@ public:
     explicit EmulatedConsole();
     ~EmulatedConsole();
 
-    YUZU_NON_COPYABLE(EmulatedConsole);
-    YUZU_NON_MOVEABLE(EmulatedConsole);
+    EDEN_NON_COPYABLE(EmulatedConsole);
+    EDEN_NON_MOVEABLE(EmulatedConsole);
 
     /// Removes all callbacks created from input devices
     void UnloadInput();

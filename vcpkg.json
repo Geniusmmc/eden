@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
-    "name": "yuzu",
+    "name": "eden",
     "builtin-baseline": "ea2a964f9303270322cf3f2d51c265ba146c422d",
     "version": "1.0",
     "dependencies": [
@@ -26,10 +26,10 @@
         "lz4",
         "nlohmann-json",
         "zlib",
-        "zstd"       
+        "zstd"
     ],
     "features": {
-        "yuzu-tests": {
+        "eden-tests": {
             "description": "Compile tests",
             "dependencies": [ "catch2" ]
         },
@@ -49,13 +49,9 @@
             "version": "3.3.1"
         },
         {
-            "name": "fmt",
-            "version": "10.1.1"
-        },
-        {
             "name": "boost-process",
             "version": "1.81.0"
         }
-      
+
     ]
 }

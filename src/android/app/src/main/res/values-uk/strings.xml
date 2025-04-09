@@ -97,7 +97,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Ранній доступ</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">Переваги раннього доступу</string>
     <string name="cutting_edge_features">Новітні можливості</string>
     <string name="early_access_updates">Ранній доступ до оновлень</string>

@@ -143,8 +143,8 @@ std::ostream& operator<<(std::ostream& os, ResultStatus status);
 /// Interface for loading an application
 class AppLoader {
 public:
-    YUZU_NON_COPYABLE(AppLoader);
-    YUZU_NON_MOVEABLE(AppLoader);
+    EDEN_NON_COPYABLE(AppLoader);
+    EDEN_NON_MOVEABLE(AppLoader);
 
     struct LoadParameters {
         s32 main_thread_priority;

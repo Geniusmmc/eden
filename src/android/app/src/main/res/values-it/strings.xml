@@ -174,7 +174,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Accesso Anticipato</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">Vantaggi dell\'accesso anticipato</string>
     <string name="cutting_edge_features">Funzionalità all\'avanguardia</string>
     <string name="early_access_updates">Accesso anticipato agli aggiornamenti</string>

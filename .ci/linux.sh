@@ -22,7 +22,7 @@ cmake .. -G Ninja \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DENABLE_QT_TRANSLATION=ON \
     -DUSE_DISCORD_PRESENCE=ON \
-    -DYUZU_USE_BUNDLED_VCPKG=ON \
+    -DEDEN_USE_BUNDLED_VCPKG=ON \
 	"${EXTRA_CMAKE_FLAGS[@]}"
 ninja
 if [ -d "bin/Release" ]; then

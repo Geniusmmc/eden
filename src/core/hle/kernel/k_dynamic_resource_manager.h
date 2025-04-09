@@ -12,8 +12,8 @@ namespace Kernel {
 
 template <typename T, bool ClearNode = false>
 class KDynamicResourceManager {
-    YUZU_NON_COPYABLE(KDynamicResourceManager);
-    YUZU_NON_MOVEABLE(KDynamicResourceManager);
+    EDEN_NON_COPYABLE(KDynamicResourceManager);
+    EDEN_NON_MOVEABLE(KDynamicResourceManager);
 
 public:
     using DynamicSlabType = KDynamicSlabHeap<T, ClearNode>;

@@ -14,8 +14,8 @@ namespace Kernel {
 namespace {
 
 class KScopedLightLockPair {
-    YUZU_NON_COPYABLE(KScopedLightLockPair);
-    YUZU_NON_MOVEABLE(KScopedLightLockPair);
+    EDEN_NON_COPYABLE(KScopedLightLockPair);
+    EDEN_NON_MOVEABLE(KScopedLightLockPair);
 
 private:
     KLightLock* m_lower;

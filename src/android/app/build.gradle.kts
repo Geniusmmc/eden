@@ -25,7 +25,7 @@ val autoVersion = (((System.currentTimeMillis() / 1000) - 1451606400) / 10).toIn
 
 @Suppress("UnstableApiUsage")
 android {
-    namespace = "org.yuzu.yuzu_emu"
+    namespace = "org.eden.eden_emu"
 
     compileSdkVersion = "android-35"
     ndkVersion = "26.1.10909125"
@@ -170,9 +170,9 @@ android {
                     "-DENABLE_WEB_SERVICE=0", // Don't use telemetry
                     "-DBUNDLE_SPEEX=ON",
                     "-DANDROID_ARM_NEON=true", // cryptopp requires Neon to work
-                    "-DYUZU_USE_BUNDLED_VCPKG=ON",
-                    "-DYUZU_USE_BUNDLED_FFMPEG=ON",
-                    "-DYUZU_ENABLE_LTO=ON",
+                    "-DEDEN_USE_BUNDLED_VCPKG=ON",
+                    "-DEDEN_USE_BUNDLED_FFMPEG=ON",
+                    "-DEDEN_ENABLE_LTO=ON",
                     "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
                 )
 

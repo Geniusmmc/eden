@@ -178,8 +178,8 @@ public:
     explicit EmulatedController(NpadIdType npad_id_type_);
     ~EmulatedController();
 
-    YUZU_NON_COPYABLE(EmulatedController);
-    YUZU_NON_MOVEABLE(EmulatedController);
+    EDEN_NON_COPYABLE(EmulatedController);
+    EDEN_NON_MOVEABLE(EmulatedController);
 
     /// Converts the controller type from settings to npad type
     static NpadStyleIndex MapSettingsTypeToNPad(Settings::ControllerType type);

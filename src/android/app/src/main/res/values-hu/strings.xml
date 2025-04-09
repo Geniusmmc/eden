@@ -181,7 +181,7 @@
 
     <!-- Early access upgrade strings -->
     <string name="early_access">Korai hozzáférés</string>
-    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.yuzu.yuzu_emu.ea</string>
+    <string name="play_store_link">https://play.google.com/store/apps/details?id=org.eden.eden_emu.ea</string>
     <string name="early_access_benefits">Korai hozzáférés előnyei</string>
     <string name="cutting_edge_features">Legújabb funkciók</string>
     <string name="early_access_updates">Korai hozzáférés a frissítésekhez</string>

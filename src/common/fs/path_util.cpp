@@ -88,11 +88,11 @@ public:
         fs::path yuzu_path_config;
 
 #ifdef _WIN32
-#ifdef YUZU_ENABLE_PORTABLE
+#ifdef EDEN_ENABLE_PORTABLE
         yuzu_path = GetExeDirectory() / PORTABLE_DIR;
 #endif
         if (!IsDir(yuzu_path)) {
-            yuzu_path = GetAppDataRoamingDirectory() / YUZU_DIR;
+            yuzu_path = GetAppDataRoamingDirectory() / EDEN_DIR;
         }
 
         yuzu_path_cache = yuzu_path / CACHE_DIR;
@@ -102,16 +102,16 @@ public:
         yuzu_path_cache = yuzu_path / CACHE_DIR;
         yuzu_path_config = yuzu_path / CONFIG_DIR;
 #else
-#ifdef YUZU_ENABLE_PORTABLE
+#ifdef EDEN_ENABLE_PORTABLE
         yuzu_path = GetCurrentDir() / PORTABLE_DIR;
 #endif
         if (Exists(yuzu_path) && IsDir(yuzu_path)) {
             yuzu_path_cache = yuzu_path / CACHE_DIR;
             yuzu_path_config = yuzu_path / CONFIG_DIR;
         } else {
-            yuzu_path = GetDataDirectory("XDG_DATA_HOME") / YUZU_DIR;
-            yuzu_path_cache = GetDataDirectory("XDG_CACHE_HOME") / YUZU_DIR;
-            yuzu_path_config = GetDataDirectory("XDG_CONFIG_HOME") / YUZU_DIR;
+            yuzu_path = GetDataDirectory("XDG_DATA_HOME") / EDEN_DIR;
+            yuzu_path_cache = GetDataDirectory("XDG_CACHE_HOME") / EDEN_DIR;
+            yuzu_path_config = GetDataDirectory("XDG_CONFIG_HOME") / EDEN_DIR;
         }
 #endif
 
