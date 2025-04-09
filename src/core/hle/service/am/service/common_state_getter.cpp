@@ -140,6 +140,19 @@ Result ICommonStateGetter::GetDefaultDisplayResolutionChangeEvent(
     R_SUCCEED();
 }
 
+Result ICommonStateGetter::GetHdcpAuthenticationState(Out<s32> out_state) {
+    LOG_DEBUG(Service_AM, "called");
+    *out_state = 1;
+    R_SUCCEED();
+}
+
+Result ICommonStateGetter::GetHdcpAuthenticationStateChangeEvent(
+    OutCopyHandle<Kernel::KReadableEvent> out_event) {
+    LOG_DEBUG(Service_AM, "called");
+    *out_event = m_applet->lifecycle_manager.GetHDCPStateChangedEvent().GetHandle();
+    R_SUCCEED();
+}
+
 Result ICommonStateGetter::GetOperationMode(Out<OperationMode> out_operation_mode) {
     const bool use_docked_mode{Settings::IsDockedMode()};
     LOG_DEBUG(Service_AM, "called, use_docked_mode={}", use_docked_mode);
