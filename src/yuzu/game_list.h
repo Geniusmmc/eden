@@ -106,6 +106,9 @@ public:
 
     static const QStringList supported_file_extensions;
 
+public slots:
+    void RefreshGameDirectory();
+
 signals:
     void BootGame(const QString& game_path, StartGameType type);
     void GameChosen(const QString& game_path, const u64 title_id = 0);
@@ -146,8 +149,6 @@ private:
 
 private:
     void ValidateEntry(const QModelIndex& item);
-
-    void RefreshGameDirectory();
 
     void ToggleFavorite(u64 program_id);
     void AddFavorite(u64 program_id);

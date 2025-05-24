@@ -389,6 +389,7 @@ private slots:
     void OnAbout();
     void OnToggleFilterBar();
     void OnToggleStatusBar();
+    void OnGameListRefresh();
     void OnDisplayTitleBars(bool);
     void InitializeHotkeys();
     void ToggleFullscreen();
@@ -519,6 +520,7 @@ private:
     QLabel* firmware_label = nullptr;
     QPushButton* gpu_accuracy_button = nullptr;
     QPushButton* renderer_status_button = nullptr;
+    QPushButton* refresh_button = nullptr;
     QPushButton* dock_status_button = nullptr;
     QPushButton* filter_status_button = nullptr;
     QPushButton* aa_status_button = nullptr;
