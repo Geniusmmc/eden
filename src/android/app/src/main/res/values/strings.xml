@@ -178,7 +178,7 @@
     <string name="multiplayer_hide_full_rooms">Hide Full Rooms</string>
     <string name="multiplayer_hide_empty_rooms">Hide Empty Rooms</string>
     <string name="multiplayer_tap_refresh_to_check_again">Tap refresh to check again</string>
-    <string name="multiplayer_search_public_lobbies">Search Public Lobbies…</string>
+    <string name="multiplayer_search_public_lobbies">Search Lobbies…</string>
     <string name="emulation_multiplayer">Multiplayer</string>
     <string name="multiplayer_game_name">Preferred Games</string>
     <string name="multiplayer_preferred_game_name">Preferred Game</string>

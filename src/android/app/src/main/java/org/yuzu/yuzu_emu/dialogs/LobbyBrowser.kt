@@ -12,6 +12,9 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.getSystemService
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -82,8 +85,23 @@ class LobbyBrowser(context: Context) : BottomSheetDialog(context) {
             } else {
                 binding.clearButton.visibility = View.INVISIBLE
             }
-            adapter.filterAndSearch()
         }
+
+        binding.searchText.setOnEditorActionListener { v, action, _ ->
+            if (action == EditorInfo.IME_ACTION_DONE) {
+                v.clearFocus()
+
+                val imm = context.getSystemService<InputMethodManager>()
+                imm?.hideSoftInputFromWindow(v.windowToken, 0)
+
+                adapter.filterAndSearch()
+                true
+            } else {
+                false
+            }
+        }
+
+        binding.btnSubmit.setOnClickListener { adapter.filterAndSearch() }
 
         binding.clearButton.setOnClickListener {
             binding.searchText.setText("")
