@@ -94,7 +94,7 @@ public:
     bool IsEmpty() const;
 
     void LoadCompatibilityList();
-    void PopulateAsync(QVector<UISettings::GameDir>& game_dirs);
+    void PopulateAsync(QVector<UISettings::GameDir>& game_dirs, const bool cached = true);
 
     void SaveInterfaceLayout();
     void LoadInterfaceLayout();
@@ -107,6 +107,7 @@ public:
     static const QStringList supported_file_extensions;
 
 public slots:
+    void ForceRefreshGameDirectory();
     void RefreshGameDirectory();
 
 signals:

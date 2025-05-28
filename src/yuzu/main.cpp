@@ -448,7 +448,8 @@ GMainWindow::GMainWindow(bool has_broken_vulkan)
     OnCheckFirmwareDecryption();
 
     game_list->LoadCompatibilityList();
-    game_list->PopulateAsync(UISettings::values.game_dirs);
+    // force reload on first load to ensure add-ons get updated
+    game_list->PopulateAsync(UISettings::values.game_dirs, false);
 
     // make sure menubar has the arrow cursor instead of inheriting from this
     ui->menubar->setCursor(QCursor());
@@ -4493,7 +4494,8 @@ void GMainWindow::OnToggleStatusBar() {
 
 void GMainWindow::OnGameListRefresh()
 {
-    game_list->RefreshGameDirectory();
+    // force reload add-ons etc
+    game_list->ForceRefreshGameDirectory();
 }
 
 void GMainWindow::OnAlbum() {
