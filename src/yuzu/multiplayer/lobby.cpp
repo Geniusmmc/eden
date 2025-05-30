@@ -186,7 +186,7 @@ void Lobby::OnJoinRoom(const QModelIndex& source) {
         proxy->data(connection_index, LobbyItemHost::HostVerifyUIDRole).toString().toStdString();
 
     // attempt to connect in a different thread
-    QFuture<void> f = QtConcurrent::run([nickname, ip, port, password, verify_uid, this] {
+    QFuture<void> f = QtConcurrent::run([nickname, ip, port, password, verify_uid] {
         std::string token;
 #ifdef ENABLE_WEB_SERVICE
         if (!Settings::values.yuzu_username.GetValue().empty() &&
