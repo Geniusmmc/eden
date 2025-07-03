@@ -373,7 +373,7 @@ abstract class SettingsItem(
                     titleId = R.string.renderer_resolution,
                     choicesId = R.array.rendererResolutionNames,
                     valuesId = R.array.rendererResolutionValues,
-                    warnChoices = (5..6).toList(),
+                    warnChoices = (5..7).toList(),
                     warningMessage = R.string.warning_resolution
                 )
             )

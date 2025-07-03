@@ -250,7 +250,9 @@ class SettingsDialogFragment : DialogFragment(), DialogInterface.OnClickListener
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.warning)
                         .setMessage(scSetting.warningMessage)
-                        .create().show()
+                        .setPositiveButton(R.string.ok, null)
+                        .create()
+                        .show()
                 }
                 scSetting.setSelectedValue(value)
             }
