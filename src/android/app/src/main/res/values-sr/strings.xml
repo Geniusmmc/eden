@@ -254,6 +254,7 @@
     <string name="about">О томе</string>
     <string name="about_description">Изградите верзију, кредите и још много тога</string>
     <string name="warning_help">Помоћи</string>
+    <string name="warning">упозорење</string>
     <string name="warning_skip">Прескочити</string>
     <string name="warning_cancel">Отказати</string>
     <string name="install_amiibo_keys">Инсталирајте Амиибо Кеис</string>
@@ -433,6 +434,8 @@
     <string name="use_disk_shader_cache_description">Смањује муцање локалном чувањем и учитавањем генерисаних схадера.</string>
     <string name="anisotropic_filtering">Анисотропни филтрирање</string>
     <string name="anisotropic_filtering_description">Побољшава квалитет текстура када се посматра у косим угловима</string>
+
+    <string name="warning_resolution">Познато је да скалирање резолуције изнад 2x изазива проблеме и може довести до значајног успоравања вашег уређаја.</string>
 
     <!-- Debug settings strings -->
     <string name="cpu">ЦПУ</string>
