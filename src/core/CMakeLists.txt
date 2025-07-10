@@ -1150,7 +1150,7 @@ add_library(core STATIC
     tools/renderdoc.h
 )
 
-if (UNIX AND NOT APPLE AND NOT ANDROID)
+if (UNIX AND NOT APPLE AND NOT ANDROID AND NOT STREQUAL "FreeBSD")
     # find_package(libiw REQUIRED)
     target_link_libraries(core PRIVATE iw)
 endif()
