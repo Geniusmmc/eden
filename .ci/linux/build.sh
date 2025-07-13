@@ -71,6 +71,7 @@ if [ "$USE_MULTIMEDIA" = "false" ]; then
     MULTIMEDIA=OFF
 else
     MULTIMEDIA=ON
+fi
 
 if [ -z "$BUILD_TYPE" ]; then
     export BUILD_TYPE="Release"
