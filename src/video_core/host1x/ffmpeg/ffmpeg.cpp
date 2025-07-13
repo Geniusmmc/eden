@@ -233,20 +233,22 @@ std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
 		return true;
 	};
 
-	std::shared_ptr<Frame> intermediate_frame = std::make_shared<Frame>();
-	if (!ReceiveImpl(intermediate_frame->GetFrame())) {
+	Frame intermediate_frame;
+	if (!ReceiveImpl(intermediate_frame.GetFrame())) {
 		return {};
 	}
 
-	const auto desc = av_pix_fmt_desc_get(intermediate_frame->GetPixelFormat());
+	const auto desc = av_pix_fmt_desc_get(intermediate_frame.GetPixelFormat());
 	if (m_codec_context->hw_device_ctx && (desc && desc->flags & AV_PIX_FMT_FLAG_HWACCEL)) {
 		m_temp_frame->SetFormat(PreferredGpuFormat);
-		if (int ret = av_hwframe_transfer_data(m_temp_frame->GetFrame(), intermediate_frame->GetFrame(), 0); ret < 0) {
+		if (int ret = av_hwframe_transfer_data(m_temp_frame->GetFrame(), intermediate_frame.GetFrame(), 0); ret < 0) {
 			LOG_ERROR(HW_GPU, "av_hwframe_transfer_data error: {}", AVError(ret));
 			return {};
 		}
 	} else {
-		m_temp_frame = std::move(intermediate_frame);
+        if(!ReceiveImpl(m_temp_frame->GetFrame())) {
+            return {};
+        }
 	}
 
 	return std::move(m_temp_frame);
