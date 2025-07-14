@@ -177,6 +177,10 @@ object GpuDriverHelper {
      * @return A non-null [GpuDriverMetadata] instance that may have null members
      */
     fun getMetadataFromZip(driver: File): GpuDriverMetadata {
+        if (!driver.exists()) {
+            return GpuDriverMetadata()
+        }
+
         try {
             ZipFile(driver).use { zf ->
                 val entries = zf.entries()
