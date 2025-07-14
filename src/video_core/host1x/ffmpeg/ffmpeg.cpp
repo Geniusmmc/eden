@@ -26,15 +26,20 @@ namespace {
 constexpr AVPixelFormat PreferredGpuFormat = AV_PIX_FMT_NV12;
 constexpr AVPixelFormat PreferredCpuFormat = AV_PIX_FMT_YUV420P;
 constexpr std::array PreferredGpuDecoders = {
-    AV_HWDEVICE_TYPE_CUDA,
 #ifdef _WIN32
     AV_HWDEVICE_TYPE_D3D11VA,
     AV_HWDEVICE_TYPE_DXVA2,
+    AV_HWDEVICE_TYPE_CUDA,
+    AV_HWDEVICE_TYPE_VULKAN,
+#elif defined(__FreeBSD__)
+    AV_HWDEVICE_TYPE_VDPAU,
+    AV_HWDEVICE_TYPE_VULKAN,
 #elif defined(__unix__)
     AV_HWDEVICE_TYPE_VAAPI,
     AV_HWDEVICE_TYPE_VDPAU,
-#endif
+    AV_HWDEVICE_TYPE_CUDA,
     AV_HWDEVICE_TYPE_VULKAN,
+#endif
 };
 
 AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* pix_fmts) {
