@@ -23,8 +23,6 @@ namespace FFmpeg {
 
 namespace {
 
-constexpr AVPixelFormat PreferredGpuFormat = AV_PIX_FMT_NV12;
-constexpr AVPixelFormat PreferredCpuFormat = AV_PIX_FMT_YUV420P;
 constexpr std::array PreferredGpuDecoders = {
 #if defined (_WIN32)
     AV_HWDEVICE_TYPE_CUDA,
@@ -41,17 +39,34 @@ constexpr std::array PreferredGpuDecoders = {
 };
 
 AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* pix_fmts) {
-    for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p) {
-        if (*p == codec_context->pix_fmt) {
-            return codec_context->pix_fmt;
-        }
-    }
+	for (int i = 0;; i++) {
+		const AVCodecHWConfig* config = avcodec_get_hw_config(codec_context->codec, i);
+		if (!config) {
+			break;
+		}
+
+		if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) {
+			if (config->device_type == AV_HWDEVICE_TYPE_CUDA) {
+				return AV_PIX_FMT_CUDA;
+			} else if (config->device_type == AV_HWDEVICE_TYPE_VAAPI) {
+				return AV_PIX_FMT_VAAPI;
+			}
+		}
+	}
+
+	const auto desc = av_pix_fmt_desc_get(codec_context->pix_fmt);
+	if (desc && desc->flags & AV_PIX_FMT_FLAG_HWACCEL) {
+		for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p) {
+			if (*p == codec_context->pix_fmt) {
+				return codec_context->pix_fmt;
+			}
+		}
+	}
 
     LOG_INFO(HW_GPU, "Could not find compatible GPU AV format, falling back to CPU");
     av_buffer_unref(&codec_context->hw_device_ctx);
 
-    codec_context->pix_fmt = PreferredCpuFormat;
-    return codec_context->pix_fmt;
+    return AV_PIX_FMT_YUV420P;
 }
 
 std::string AVError(int errnum) {
@@ -60,7 +75,7 @@ std::string AVError(int errnum) {
     return errbuf;
 }
 
-} // namespace
+}
 
 Packet::Packet(std::span<const u8> data) {
     m_packet = av_packet_alloc();
@@ -83,16 +98,16 @@ Frame::~Frame() {
 Decoder::Decoder(Tegra::Host1x::NvdecCommon::VideoCodec codec) {
     const AVCodecID av_codec = [&] {
         switch (codec) {
-        case Tegra::Host1x::NvdecCommon::VideoCodec::H264:
-            return AV_CODEC_ID_H264;
-        case Tegra::Host1x::NvdecCommon::VideoCodec::VP8:
-            return AV_CODEC_ID_VP8;
-        case Tegra::Host1x::NvdecCommon::VideoCodec::VP9:
-            return AV_CODEC_ID_VP9;
-        default:
-            UNIMPLEMENTED_MSG("Unknown codec {}", codec);
-            return AV_CODEC_ID_NONE;
-        }
+			case Tegra::Host1x::NvdecCommon::VideoCodec::H264:
+				return AV_CODEC_ID_H264;
+			case Tegra::Host1x::NvdecCommon::VideoCodec::VP8:
+				return AV_CODEC_ID_VP8;
+			case Tegra::Host1x::NvdecCommon::VideoCodec::VP9:
+				return AV_CODEC_ID_VP9;
+			default:
+				UNIMPLEMENTED_MSG("Unknown codec {}", codec);
+				return AV_CODEC_ID_NONE;
+			}
     }();
 
     m_codec = avcodec_find_decoder(av_codec);
@@ -218,17 +233,17 @@ bool DecoderContext::OpenContext(const Decoder& decoder) {
 }
 
 bool DecoderContext::SendPacket(const Packet& packet) {
-	m_temp_frame = std::make_shared<Frame>();
-	
     if (const int ret = avcodec_send_packet(m_codec_context, packet.GetPacket()); ret < 0 && ret != AVERROR_EOF) {
         LOG_ERROR(HW_GPU, "avcodec_send_packet error: {}", AVError(ret));
         return false;
     }
-	
+
     return true;
 }
 
 std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
+	m_temp_frame = std::make_shared<Frame>();
+
 	auto ReceiveImpl = [&](AVFrame* frame) -> bool {
 		if (const int ret = avcodec_receive_frame(m_codec_context, frame); ret < 0 && ret != AVERROR_EOF) {
 			LOG_ERROR(HW_GPU, "avcodec_receive_frame error: {}", AVError(ret));
@@ -242,9 +257,8 @@ std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
 		return {};
 	}
 
-	const auto desc = av_pix_fmt_desc_get(intermediate_frame->GetPixelFormat());
-	if (m_codec_context->hw_device_ctx && desc && desc->flags & AV_PIX_FMT_FLAG_HWACCEL) {
-		m_temp_frame->SetFormat(PreferredGpuFormat);
+	if (m_codec_context->hw_device_ctx) {
+		m_temp_frame->SetFormat(AV_PIX_FMT_NV12);
 		if (int ret = av_hwframe_transfer_data(m_temp_frame->GetFrame(), intermediate_frame->GetFrame(), 0); ret < 0) {
 			LOG_ERROR(HW_GPU, "av_hwframe_transfer_data error: {}", AVError(ret));
 			return {};
@@ -292,4 +306,4 @@ std::shared_ptr<Frame> DecodeApi::ReceiveFrame() {
     return m_decoder_context->ReceiveFrame();
 }
 
-} // namespace FFmpeg
+}
