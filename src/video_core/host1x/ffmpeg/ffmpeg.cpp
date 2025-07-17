@@ -39,6 +39,7 @@ constexpr std::array PreferredGpuDecoders = {
 };
 
 AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* pix_fmts) {
+	// Check if there is a specific pixel format supported by the GPU decoder.
 	for (int i = 0;; i++) {
 		const AVCodecHWConfig* config = avcodec_get_hw_config(codec_context->codec, i);
 		if (!config) {
@@ -54,6 +55,7 @@ AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* p
 		}
 	}
 
+	// Check if there is another pixel format supported by the GPU decoder.
 	const auto desc = av_pix_fmt_desc_get(codec_context->pix_fmt);
 	if (desc && desc->flags & AV_PIX_FMT_FLAG_HWACCEL) {
 		for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p) {
@@ -63,7 +65,8 @@ AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* p
 		}
 	}
 
-    LOG_INFO(HW_GPU, "Could not find compatible GPU AV format, falling back to CPU");
+	// Fallback to CPU decoder.
+    LOG_INFO(HW_GPU, "Could not find compatible GPU pixel format, falling back to CPU");
     av_buffer_unref(&codec_context->hw_device_ctx);
 
     return AV_PIX_FMT_YUV420P;
@@ -242,8 +245,6 @@ bool DecoderContext::SendPacket(const Packet& packet) {
 }
 
 std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
-	m_temp_frame = std::make_shared<Frame>();
-
 	auto ReceiveImpl = [&](AVFrame* frame) -> bool {
 		if (const int ret = avcodec_receive_frame(m_codec_context, frame); ret < 0 && ret != AVERROR_EOF) {
 			LOG_ERROR(HW_GPU, "avcodec_receive_frame error: {}", AVError(ret));
@@ -257,6 +258,7 @@ std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
 		return {};
 	}
 
+	m_temp_frame = std::make_shared<Frame>();
 	if (m_codec_context->hw_device_ctx) {
 		m_temp_frame->SetFormat(AV_PIX_FMT_NV12);
 		if (int ret = av_hwframe_transfer_data(m_temp_frame->GetFrame(), intermediate_frame->GetFrame(), 0); ret < 0) {
