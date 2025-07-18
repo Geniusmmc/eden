@@ -1,6 +1,3 @@
-// SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
-// SPDX-License-Identifier: GPL-3.0-or-later
-
 // SPDX-FileCopyrightText: Copyright 2023 yuzu Emulator Project
 // SPDX-License-Identifier: GPL-2.0-or-later
 
@@ -39,23 +36,7 @@ constexpr std::array PreferredGpuDecoders = {
 };
 
 AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* pix_fmts) {
-	// Check if there is a specific pixel format supported by the GPU decoder.
-	for (int i = 0;; i++) {
-		const AVCodecHWConfig* config = avcodec_get_hw_config(codec_context->codec, i);
-		if (!config) {
-			break;
-		}
-
-		if (config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) {
-			if (config->device_type == AV_HWDEVICE_TYPE_CUDA) {
-				return AV_PIX_FMT_CUDA;
-			} else if (config->device_type == AV_HWDEVICE_TYPE_VAAPI) {
-				return AV_PIX_FMT_VAAPI;
-			}
-		}
-	}
-
-	// Check if there is another pixel format supported by the GPU decoder.
+	// Check if there is a pixel format supported by the GPU decoder.
 	const auto desc = av_pix_fmt_desc_get(codec_context->pix_fmt);
 	if (desc && desc->flags & AV_PIX_FMT_FLAG_HWACCEL) {
 		for (const AVPixelFormat* p = pix_fmts; *p != AV_PIX_FMT_NONE; ++p) {
@@ -65,11 +46,23 @@ AVPixelFormat GetGpuFormat(AVCodecContext* codec_context, const AVPixelFormat* p
 		}
 	}
 
+	// Another check to confirm if there is a pixel format supported by specific GPU decoders.
+	for (int i = 0;; i++) {
+		const AVCodecHWConfig* config = avcodec_get_hw_config(codec_context->codec, i);
+		if (!config) {
+			break;
+		}
+
+		if ((config->methods & AV_CODEC_HW_CONFIG_METHOD_HW_DEVICE_CTX) && (config->device_type == AV_HWDEVICE_TYPE_CUDA || config->device_type == AV_HWDEVICE_TYPE_VAAPI)) {
+			return config->pix_fmt;
+		}
+	}
+
 	// Fallback to CPU decoder.
     LOG_INFO(HW_GPU, "Could not find compatible GPU pixel format, falling back to CPU");
     av_buffer_unref(&codec_context->hw_device_ctx);
 
-    return AV_PIX_FMT_YUV420P;
+    return codec_context->pix_fmt;
 }
 
 std::string AVError(int errnum) {
@@ -266,6 +259,7 @@ std::shared_ptr<Frame> DecoderContext::ReceiveFrame() {
 			return {};
 		}
 	} else {
+		m_temp_frame->SetFormat(AV_PIX_FMT_YUV420P);
 		m_temp_frame = std::move(intermediate_frame);
 	}
 
