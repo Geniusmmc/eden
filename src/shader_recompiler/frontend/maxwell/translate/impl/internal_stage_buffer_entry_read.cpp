@@ -48,7 +48,7 @@ void TranslatorVisitor::ISBERD(u64 insn) {
     if (isberd.shift != Shift::Default) {
         throw NotImplementedException("Shift {}", isberd.shift.Value());
     }
-    LOG_WARNING(Shader, "(STUBBED) called {}", insn);
+    //LOG_DEBUG(Shader, "(STUBBED) called {}", insn);
     if (isberd.src_reg_num == 0xFF) {
         IR::U32 src_imm{ir.Imm32(static_cast<u32>(isberd.imm))};
         IR::U32 result{ir.IAdd(X(isberd.src_reg), src_imm)};
