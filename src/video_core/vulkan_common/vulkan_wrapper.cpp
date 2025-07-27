@@ -446,7 +446,7 @@ Instance Instance::Create(u32 version, Span<const char*> layers, Span<const char
         .pNext = nullptr,
         .pApplicationName = "yuzu Emulator",
         .applicationVersion = VK_MAKE_VERSION(0, 1, 0),
-        .pEngineName = "yuzu Emulator",
+        .pEngineName = "Eden Emulator",
         .engineVersion = VK_MAKE_VERSION(0, 1, 0),
         .apiVersion = VK_API_VERSION_1_3,
     };
