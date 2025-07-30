@@ -255,6 +255,11 @@ void IPSwitchCompiler::Parse() {
 
                 const auto& patch_line = lines[++i];
 
+                // Patch line may contain comments
+                if (StartsWith(patch_line, "//")) {
+                    continue;
+                }
+
                 // Start of new patch
                 if (StartsWith(patch_line, "@enabled") || StartsWith(patch_line, "@disabled")) {
                     --i;
