@@ -956,19 +956,17 @@ void System::RegisterHostThread() {
     impl->kernel.RegisterHostThread();
 }
 
-void System::EnterCPUProfile() {
 #if MICROPROFILE_ENABLED
+void System::EnterCPUProfile() {
     std::size_t core = impl->kernel.GetCurrentHostThreadID();
     impl->dynarmic_ticks[core] = MicroProfileEnter(impl->microprofile_cpu[core]);
-#endif
 }
 
 void System::ExitCPUProfile() {
-#if MICROPROFILE_ENABLED
     std::size_t core = impl->kernel.GetCurrentHostThreadID();
     MicroProfileLeave(impl->microprofile_cpu[core], impl->dynarmic_ticks[core]);
-#endif
 }
+#endif
 
 bool System::IsMulticore() const {
     return impl->is_multicore;
