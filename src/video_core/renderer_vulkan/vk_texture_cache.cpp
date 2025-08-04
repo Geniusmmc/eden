@@ -2034,9 +2034,12 @@ ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::ImageViewI
         render_target = Handle(TextureType::ColorArray1D);
         break;
     case VideoCommon::ImageViewType::e2D:
-    case VideoCommon::ImageViewType::e2DArray:
     case VideoCommon::ImageViewType::Rect:
         create(TextureType::Color2D, 1);
+        render_target = Handle(Shader::TextureType::Color2D);
+        break;
+
+    case VideoCommon::ImageViewType::e2DArray:
         create(TextureType::ColorArray2D, std::nullopt);
         render_target = Handle(Shader::TextureType::ColorArray2D);
         break;
@@ -2054,6 +2057,7 @@ ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::ImageViewI
         break;
     }
 }
+
 
 ImageView::ImageView(TextureCacheRuntime& runtime, const VideoCommon::ImageViewInfo& info,
                      ImageId image_id_, Image& image, const SlotVector<Image>& slot_imgs)
