@@ -41,6 +41,7 @@ void TranslatorVisitor::ISBERD(u64 insn) {
     } const isberd{insn};
 
     bool is_only_skew_op = true;
+    bool no_other_op = true;
     auto apply_shift = [&](IR::U32 result) -> IR::U32 {
         switch (isberd.shift.Value()) {
         case Shift::U16:
@@ -69,6 +70,7 @@ void TranslatorVisitor::ISBERD(u64 insn) {
         }
 
         is_only_skew_op = false;
+        no_other_op = false;
         X(isberd.dest_reg, result);
     }
 
@@ -104,13 +106,14 @@ void TranslatorVisitor::ISBERD(u64 insn) {
         }
 
         is_only_skew_op = false;
+        no_other_op = false;
         X(isberd.dest_reg, result_u32);
     }
 
     if (isberd.skew != 0 && is_only_skew_op) {
         IR::U32 result = ir.IAdd(X(isberd.src_reg), ir.LaneId());
         X(isberd.dest_reg, result);
-    } else {
+    } else if (no_other_op) {
          X(isberd.dest_reg, X(isberd.src_reg));
     }  
 }
