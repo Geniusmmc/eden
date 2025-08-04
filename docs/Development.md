@@ -36,7 +36,12 @@ Pull requests are only to be merged by core developers when properly tested and 
 [cmake, core] Unbreak FreeBSD Building Process
 ```
 
-The level of namespacing is generally left to the committer's choice, but we never recommend going more than two levels *except* in `hle`, in which case you may go as many as four levels depending on the specificity of your changes. Ocassionally up to two namespaces may be provided for more clarity. Developers are permitted to change namespaces at will. Commits within PRs are not required to be namespaced, but it is highly recommended.
+- The level of namespacing is generally left to the committer's choice.
+- However, we never recommend going more than two levels *except* in `hle`, in which case you may go as many as four levels depending on the specificity of your changes.
+- Ocassionally, up to two namespaces may be provided for more clarity.
+  * Changes that affect the entire project (sans CMake changes) should be namespaced as `meta`.
+- Maintainers are permitted to change namespaces at will.
+- Commits within PRs are not required to be namespaced, but it is highly recommended.
 
 # IDE setup
 
@@ -55,6 +60,8 @@ Copy this to `.vscode/settings.json`, get CMake tools and it should be ready to 
     "git.alwaysSignOff": true
 }
 ```
+
+You may additionally need the `Qt Extension Pack` extension if building Qt.
 
 # Build speedup
 
