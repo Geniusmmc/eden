@@ -110,7 +110,9 @@ void TranslatorVisitor::ISBERD(u64 insn) {
     if (isberd.skew != 0 && is_only_skew_op) {
         IR::U32 result = ir.IAdd(X(isberd.src_reg), ir.LaneId());
         X(isberd.dest_reg, result);
-    }
+    } else {
+         X(isberd.dest_reg, X(isberd.src_reg));
+    }  
 }
 
 } // namespace Shader::Maxwell
