@@ -50,6 +50,7 @@ enum class BooleanSetting(override val key: String) : AbstractBooleanSetting {
     SOC_OVERLAY_BACKGROUND("soc_overlay_background"),
 
     ENABLE_RAII("enable_raii"),
+    RESPECT_PRESENT_INTERVAL_ZERO("respect_present_interval_zero"),
     FRAME_INTERPOLATION("frame_interpolation"),
 //    FRAME_SKIPPING("frame_skipping"),
 

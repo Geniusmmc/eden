@@ -86,6 +86,8 @@
     <string name="veil_renderer">Renderer</string>
     <string name="enable_raii">RAII</string>
     <string name="enable_raii_description">A method of automatic resource management in Vulkan that ensures proper release of resources when they are no longer needed, but may cause crashes in bundled games.</string>
+    <string name="respect_present_interval_zero">Respect present interval 0 for unlocked FPS</string>
+    <string name="respect_present_interval_zero_description">When enabled, present interval 0 will be used for games requesting unlocked FPS. This matches console behavior more closely, but may cause higher battery usage and frame pacing issues. When disabled (default), present interval 0 is capped at 120FPS to conserve battery.</string>
     <string name="frame_interpolation">Enhanced Frame Pacing</string>
     <string name="frame_interpolation_description">Ensures smooth and consistent frame delivery by synchronizing the timing between frames, reducing stuttering and uneven animation. Ideal for games that experience frame timing instability or micro-stutters during gameplay.</string>
     <string name="renderer_early_release_fences">Release Fences Early</string>

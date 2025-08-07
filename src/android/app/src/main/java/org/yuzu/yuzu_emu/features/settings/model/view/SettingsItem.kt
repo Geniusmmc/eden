@@ -229,6 +229,13 @@ abstract class SettingsItem(
             )
             put(
                 SwitchSetting(
+                    BooleanSetting.RESPECT_PRESENT_INTERVAL_ZERO,
+                    titleId = R.string.respect_present_interval_zero,
+                    descriptionId = R.string.respect_present_interval_zero_description
+                )
+            )
+            put(
+                SwitchSetting(
                     BooleanSetting.FRAME_INTERPOLATION,
                     titleId = R.string.frame_interpolation,
                     descriptionId = R.string.frame_interpolation_description
