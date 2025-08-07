@@ -566,7 +566,13 @@
     <string>&amp;Revolt</string>
    </property>
    <property name="toolTip">
-    <string>Join our Revolt--a private alternative to Discord</string>
+    <string>Revolt</string>
+   </property>
+   <property name="statusTip">
+    <string/>
+   </property>
+   <property name="whatsThis">
+    <string/>
    </property>
   </action>
  </widget>
