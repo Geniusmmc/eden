@@ -493,7 +493,12 @@ if (YUZU_ROOM)
 endif()
 
 # Extra deps
-add_subdirectory(externals)
+if (YUZU_USE_EXTERNAL_QUAZIP_QT6)
+    add_subdirectory(externals)
+else()
+    find_package(QuaZip)
+endif()
+
 target_link_libraries(yuzu PRIVATE QuaZip::QuaZip)
 
 create_target_directory_groups(yuzu)
