@@ -84,7 +84,6 @@ option(YUZU_USE_SYSTEM_OPUS "Use the system Opus library if available" ON)
 
 option(YUZU_USE_SYSTEM_HTTPLIB "Use the system cpp-httplib if available" ON)
 
-
 option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
 
 option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
