@@ -476,7 +476,6 @@ void SetupCapabilities(const Profile& profile, const Info& info, EmitContext& ct
 void PatchPhiNodes(IR::Program& program, EmitContext& ctx) {
             // Flatten all leading PHIs from each block into a vector
             std::vector<IR::Inst*> phi_instructions;
-            phi_instructions.reserve(64); // guess; adjust/remove if unneeded
             for (IR::Block* block : program.blocks) {
                 for (auto it = block->begin(); it != block->end(); ++it) {
                     if (it->GetOpcode() != IR::Opcode::Phi)
@@ -505,8 +504,6 @@ void PatchPhiNodes(IR::Program& program, EmitContext& ctx) {
 std::vector<u32> EmitSPIRV(const Profile& profile, const RuntimeInfo& runtime_info,
                            IR::Program& program, Bindings& bindings, bool optimize) {
     EmitContext ctx{profile, runtime_info, program, bindings};
-    // Reserve capacity for interfaces to reduce allocations
-    ctx.interfaces.reserve(16);
     const Id main{DefineMain(ctx, program)};
     DefineEntryPoint(program, ctx, main);
     if (profile.support_float_controls) {
