@@ -939,7 +939,7 @@ void RasterizerVulkan::UpdateDynamicStates() {
     const u8 dynamic_state = Settings::values.dyna_state.GetValue();
 
     if (dynamic_state == 0) {
-        features = DynamicFeatures{
+        auto features = DynamicFeatures{
             .has_extended_dynamic_state = device.IsExtExtendedDynamicStateSupported(),
             .has_extended_dynamic_state_2 = device.IsExtExtendedDynamicState2Supported(),
             .has_extended_dynamic_state_2_extra = device.IsExtExtendedDynamicState2ExtrasSupported(),
@@ -948,7 +948,7 @@ void RasterizerVulkan::UpdateDynamicStates() {
             .has_dynamic_vertex_input = device.IsExtVertexInputDynamicStateSupported(),
 		};
     } else {
-        dynamic_features = DynamicFeatures{
+        auto features = DynamicFeatures{
             .has_extended_dynamic_state = device.IsExtExtendedDynamicStateSupported() && dynamic_state > 0,
             .has_extended_dynamic_state_2 = device.IsExtExtendedDynamicState2Supported() && dynamic_state > 1,
             .has_extended_dynamic_state_2_extra = device.IsExtExtendedDynamicState2ExtrasSupported() && dynamic_state > 1,
