@@ -408,7 +408,7 @@ PipelineCache::PipelineCache(Tegra::MaxwellDeviceMemoryManager& device_memory_,
 
     LOG_INFO(Render_Vulkan, "DynamicState value is set to {}", (u32) dynamic_state);
 	
-    if (dyna_state == 0) {
+    if (dynamic_state == 0) {
         dynamic_features = DynamicFeatures{
             .has_extended_dynamic_state = device.IsExtExtendedDynamicStateSupported(),
             .has_extended_dynamic_state_2 = device.IsExtExtendedDynamicState2Supported(),

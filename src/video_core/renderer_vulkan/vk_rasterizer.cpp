@@ -938,7 +938,7 @@ void RasterizerVulkan::UpdateDynamicStates() {
 
     const u8 dynamic_state = Settings::values.dyna_state.GetValue();
 
-    if (dyna_state == 0) {
+    if (dynamic_state == 0) {
         features = DynamicFeatures{
             .has_extended_dynamic_state = device.IsExtExtendedDynamicStateSupported(),
             .has_extended_dynamic_state_2 = device.IsExtExtendedDynamicState2Supported(),
