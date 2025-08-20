@@ -722,7 +722,7 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         dynamic_state3_enables = true;
     }
 
-    if (Settings::values.dyna_state.GetValue() == 0) {
+    /*if (Settings::values.dyna_state.GetValue() == 0) {
         must_emulate_scaled_formats = true;
         LOG_INFO(Render_Vulkan, "Dynamic state is disabled (dyna_state = 0), forcing scaled format emulation ON");
 
@@ -745,10 +745,10 @@ Device::Device(VkInstance instance_, vk::PhysicalDevice physical_, VkSurfaceKHR 
         dynamic_state3_enables = false;
 
         LOG_INFO(Render_Vulkan, "All dynamic state extensions and features have been disabled");
-    } else {
+    } else {*/
         must_emulate_scaled_formats = false;
         LOG_INFO(Render_Vulkan, "Dynamic state is enabled (dyna_state = 1-3), disabling scaled format emulation");
-    }
+    //}
 
     logical = vk::Device::Create(physical, queue_cis, ExtensionListForVulkan(loaded_extensions),
                                  first_next, dld);
