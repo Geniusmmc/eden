@@ -31,15 +31,13 @@ HEADER_HASH="$(cat "$PWD/.ci/license/header-hash.txt")"
 echo
 echo "license-header.sh: Getting branch changes"
 
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-COMMITS=$(git log "${BRANCH}" --not master --pretty=format:"%h")
-if [ -z "$COMMITS" ]; then
+BASE=$(git merge-base master HEAD)
+if git diff --quiet "$BASE"..HEAD; then
     echo
     echo "license-header.sh: No commits on this branch different from master."
     exit 0
 fi
-RANGE="$(echo "$COMMITS" | tail -n1)^..$(echo "$COMMITS" | head -n1)"
-FILES=$(git diff-tree --no-commit-id --name-only "${RANGE}" -r)
+FILES=$(git diff --name-only "$BASE")
 
 check_header() {
     CONTENT=$(head -n3 < "$1")
