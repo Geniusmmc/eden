@@ -53,6 +53,35 @@ class DrawManager;
 
 class Maxwell3D final : public EngineInterface {
 public:
+    //TEMP: skips problematic lighting blend detected in ninja gaiden ragebound
+    //TODO: fix blending properly. seek (iterated_blend,  FCSM_TR)
+    enum class UnimplementedBlendID : u32 {
+        NGR_00 = 0
+    };
+
+    inline static bool IsUnimplementedBlend(const Maxwell3D::Regs& _regs, UnimplementedBlendID id) {
+        using Blend = Maxwell3D::Regs::Blend;
+        bool result = true;
+
+        auto eq = [](u32 v, u32 a, u32 b) { return v == a || v == b; };
+
+        if (id == UnimplementedBlendID::NGR_00) {
+            result &= !_regs.blend_per_target_enabled;
+            result &= _regs.blend.enable[0];
+            result &= eq(static_cast<u32>(_regs.blend.color_source), static_cast<u32>(Blend::Factor::One_D3D), static_cast<u32>(Blend::Factor::One_GL));
+            result &= eq(static_cast<u32>(_regs.blend.color_dest), static_cast<u32>(Blend::Factor::Zero_D3D), static_cast<u32>(Blend::Factor::Zero_GL));
+            result &= eq(static_cast<u32>(_regs.blend.alpha_source), static_cast<u32>(Blend::Factor::One_D3D), static_cast<u32>(Blend::Factor::One_GL));
+            result &= eq(static_cast<u32>(_regs.blend.alpha_dest), static_cast<u32>(Blend::Factor::OneMinusSourceAlpha_D3D), static_cast<u32>(Blend::Factor::OneMinusSourceAlpha_GL));
+            result &= eq(static_cast<u32>(_regs.blend.color_op), static_cast<u32>(Blend::Equation::Add_D3D), static_cast<u32>(Blend::Equation::Add_GL));
+            result &= eq(static_cast<u32>(_regs.blend.alpha_op), static_cast<u32>(Blend::Equation::Add_D3D), static_cast<u32>(Blend::Equation::Add_GL));
+            result &= _regs.iterated_blend.enable;
+            result &= (_regs.iterated_blend.pass_count > 0);
+            return result;
+        }
+
+        return false;
+    }
+
     explicit Maxwell3D(Core::System& system, MemoryManager& memory_manager);
     ~Maxwell3D();
 
