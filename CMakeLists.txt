@@ -406,10 +406,8 @@ if (YUZU_USE_CPM)
 
         if (NOT MSVC)
             # boost sucks
-            # Specific workaround for a bug of Solaris builds - even through -pthread is defined
-            # Solaris has some nasty /usr/include hierachy that makes boost config freak out
+            # Solaris (and probably other NIXes) need explicit pthread definition
             if (PLATFORM_SUN)
-                target_compile_definitions(boost_container INTERFACE BOOST_HAS_PTHREADS)
                 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthreads")
                 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthreads")
             endif()
