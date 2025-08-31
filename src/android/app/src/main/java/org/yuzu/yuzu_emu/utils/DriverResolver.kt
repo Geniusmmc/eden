@@ -98,7 +98,7 @@ object DriverResolver {
                 async {
                     searchRepository(repoPath, filename)
                 }
-            }.mapNotNull { it.await() }.firstOrNull().also { resolved ->
+            }.firstNotNullOfOrNull { it.await() }.also { resolved ->
                 // Cache the result if found
                 resolved?.let {
                     urlCache[filename] = it
