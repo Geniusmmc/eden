@@ -76,6 +76,7 @@
         "package": "xbyak",
         "repo": "herumi/xbyak",
         "sha": "9bb219333a",
+        "hash": "303165d45c8c19387ec49d9fda7d7a4e0d86d4c0153898c23f25ce2d58ece567f44c0bbbfe348239b933edb6e1a1e34f4bc1c0ab3a285bee5da0e548879387b0",
         "bundled": true
     },
     "xbyak": {
