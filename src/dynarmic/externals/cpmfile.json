@@ -24,7 +24,7 @@
             "UNORDERED_DENSE_INSTALL OFF"
         ],
         "patches": [
-            "0001-cmake.patch",
+            "0001-cmake.patch"
         ]
     },
     "zycore": {
