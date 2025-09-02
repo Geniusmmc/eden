@@ -96,15 +96,7 @@ if (ENABLE_WEB_SERVICE)
 endif()
 
 # unordered_dense
-AddPackage(
-    NAME unordered_dense
-    REPO "martinus/unordered_dense"
-    SHA 73f3cbb237
-    HASH c08c03063938339d61392b687562909c1a92615b6ef39ec8df19ea472aa6b6478e70d7d5e33d4a27b5d23f7806daf57fe1bacb8124c8a945c918c7663a9e8532
-    FIND_PACKAGE_ARGUMENTS "CONFIG"
-    OPTIONS
-        "UNORDERED_DENSE_INSTALL OFF"
-)
+AddJsonPackage(unordered-dense)
 
 # FFMpeg
 if (YUZU_USE_BUNDLED_FFMPEG)
