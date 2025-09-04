@@ -95,6 +95,9 @@ if (ENABLE_WEB_SERVICE)
     AddJsonPackage(cpp-jwt)
 endif()
 
+# unordered_dense
+AddJsonPackage(unordered-dense)
+
 # FFMpeg
 if (YUZU_USE_BUNDLED_FFMPEG)
     add_subdirectory(ffmpeg)
