@@ -1,11 +1,12 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-export NDK_CCACHE=$(which ccache)
+NDK_CCACHE=$(which ccache)
+export NDK_CCACHE
 
-if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
+if [ -n "${ANDROID_KEYSTORE_B64}" ]; then
     export ANDROID_KEYSTORE_FILE="${GITHUB_WORKSPACE}/ks.jks"
     base64 --decode <<< "${ANDROID_KEYSTORE_B64}" > "${ANDROID_KEYSTORE_FILE}"
 fi
@@ -16,6 +17,6 @@ chmod +x ./gradlew
 ./gradlew assembleRelease
 ./gradlew bundleRelease
 
-if [ ! -z "${ANDROID_KEYSTORE_B64}" ]; then
+if [ -n "${ANDROID_KEYSTORE_B64}" ]; then
     rm "${ANDROID_KEYSTORE_FILE}"
 fi

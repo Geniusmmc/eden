@@ -8,7 +8,7 @@
 
 [ -z "$CPM_SOURCE_CACHE" ] && CPM_SOURCE_CACHE=$PWD/.cache/cpm
 
-mkdir -p $CPM_SOURCE_CACHE
+mkdir -p "$CPM_SOURCE_CACHE"
 
 ROOTDIR="$PWD"
 
@@ -25,7 +25,7 @@ download_package() {
 
   curl "$DOWNLOAD" -sS -L -o "$OUTFILE"
 
-  ACTUAL_HASH=$(${HASH_ALGO}sum "$OUTFILE" | cut -d" " -f1)
+  ACTUAL_HASH=$("${HASH_ALGO}"sum "$OUTFILE" | cut -d" " -f1)
   [ "$ACTUAL_HASH" != "$HASH" ] && echo "$FILENAME did not match expected hash; expected $HASH but got $ACTUAL_HASH" && exit 1
 
   mkdir -p "$OUTDIR"
@@ -46,10 +46,10 @@ download_package() {
 
   # basically if only one real item exists at the top we just move everything from there
   # since github and some vendors hate me
-  DIRS=$(find -maxdepth 1 -type d -o -type f)
+  DIRS=$(find . -maxdepth 1 -type d -o -type f)
 
   # thanks gnu
-  if [ $(wc -l <<< "$DIRS") -eq 2 ]; then
+  if [ "$(wc -l <<< "$DIRS")" -eq 2 ]; then
     SUBDIR=$(find . -maxdepth 1 -type d -not -name ".")
     mv "$SUBDIR"/* .
     mv "$SUBDIR"/.* . 2>/dev/null || true
@@ -59,7 +59,7 @@ download_package() {
   if grep -e "patches" <<< "$JSON" > /dev/null; then
     PATCHES=$(jq -r '.patches | join(" ")' <<< "$JSON")
     for patch in $PATCHES; do
-      patch --binary -p1 < "$ROOTDIR"/.patch/$package/$patch
+      patch --binary -p1 < "$ROOTDIR"/.patch/"$package"/"$patch"
     done
   fi
 
@@ -102,7 +102,7 @@ ci_package() {
   done
 }
 
-for package in $@
+for package in "$@"
 do
   # prepare for cancer
   # TODO(crueter): Fetch json once?
@@ -145,12 +145,11 @@ do
   fi
 
   TAG=$(jq -r ".tag" <<< "$JSON")
-
-  TAG=$(sed "s/%VERSION%/$VERSION_REPLACE/" <<< $TAG)
+  TAG="${TAG//%VERSION%/$VERSION_REPLACE}"
 
   ARTIFACT=$(jq -r ".artifact" <<< "$JSON")
-  ARTIFACT=$(sed "s/%VERSION%/$VERSION_REPLACE/" <<< $ARTIFACT)
-  ARTIFACT=$(sed "s/%TAG%/$TAG/" <<< $ARTIFACT)
+  ARTIFACT="${ARTIFACT//%VERSION%/$VERSION_REPLACE}"
+  ARTIFACT="${ARTIFACT//%TAG%/$TAG}"
 
   if [ "$URL" != "null" ]; then
     DOWNLOAD="$URL"
@@ -219,4 +218,4 @@ do
   download_package
 done
 
-rm -rf $TMP
+rm -rf "$TMP"

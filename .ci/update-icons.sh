@@ -1,21 +1,35 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-which png2icns || [ which yay && yay libicns ] || exit
-which magick || exit
+# Check dependencies
+for cmd in png2icns magick svgo; do
+    if ! which "$cmd" >/dev/null 2>&1; then
+        pkg="$cmd"
+        case "$cmd" in
+            png2icns) pkg="icnsutils" ;;
+            magick) pkg="imagemagick" ;;
+        esac
+        echo "Error: command '$cmd' not found. Install the package '$pkg'."
+        exit 1
+    fi
+done
 
 export EDEN_SVG_ICO="dist/dev.eden_emu.eden.svg"
-svgo --multipass $EDEN_SVG_ICO
+TMP_PNG="$(mktemp /tmp/eden-tmp-XXXXXX.png)"
 
-magick -density 256x256 -background transparent $EDEN_SVG_ICO \
-    -define icon:auto-resize -colors 256 dist/eden.ico || exit
-convert -density 256x256 -resize 256x256 -background transparent $EDEN_SVG_ICO \
-    dist/yuzu.bmp || exit
+svgo --multipass "$EDEN_SVG_ICO"
 
-export TMP_PNG="dist/eden-tmp.png"
-magick -size 1024x1024 -background transparent $EDEN_SVG_ICO $TMP_PNG || exit
-png2icns dist/eden.icns $TMP_PNG || exit
-cp dist/eden.icns dist/yuzu.icns
-rm $TMP_PNG
+magick \
+    -density 256x256 -background transparent "$EDEN_SVG_ICO" \
+    -define icon:auto-resize -colors 256 "dist/eden.ico"
+
+magick "$EDEN_SVG_ICO" -resize 256x256 -background transparent "dist/yuzu.bmp"
+
+magick -size 1024x1024 -background transparent "$EDEN_SVG_ICO" "$TMP_PNG"
+
+png2icns "dist/eden.icns" "$TMP_PNG"
+
+cp "dist/eden.icns" "dist/yuzu.icns"
+rm -f "$TMP_PNG"

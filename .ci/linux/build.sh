@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 case "$1" in
@@ -87,7 +87,7 @@ if [ -z "$BUILD_TYPE" ]; then
     export BUILD_TYPE="Release"
 fi
 
-export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" $@)
+export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" "$@")
 
 mkdir -p build && cd build
 cmake .. -G Ninja \
@@ -107,7 +107,7 @@ cmake .. -G Ninja \
     -DDYNARMIC_ENABLE_LTO=ON \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
-ninja -j${NPROC}
+ninja -j"${NPROC}"
 
 if [ -d "bin/Release" ]; then
     strip -s bin/Release/*

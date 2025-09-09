@@ -1,24 +1,48 @@
 #!/bin/sh -e
 
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
+# SPDX-License-Identifier: GPL-3.0-or-later
+
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo
+    echo "license-header.sh: Eden License Headers Accreditation Script"
+    echo
+    echo "This script checks and optionally fixes license headers in source and CMake files."
+    echo
+    echo "Environment Variables:"
+    echo "  FIX=true      Automatically add the correct license headers to offending files."
+    echo "  COMMIT=true   If FIX=true, commit the changes automatically."
+    echo
+    echo "Usage Examples:"
+    echo "  # Just check headers (will fail if headers are missing)"
+    echo "  .ci/license-header.sh"
+    echo
+    echo "  # Fix headers only"
+    echo "  FIX=true .ci/license-header.sh"
+    echo
+    echo "  # Fix headers and commit changes"
+    echo "  FIX=true COMMIT=true .ci/license-header.sh"
+    exit 0
+fi
+
 HEADER="$(cat "$PWD/.ci/license/header.txt")"
 HEADER_HASH="$(cat "$PWD/.ci/license/header-hash.txt")"
 
-echo "Getting branch changes"
+echo
+echo "license-header.sh: Getting branch changes"
 
-# BRANCH=`git rev-parse --abbrev-ref HEAD`
-# COMMITS=`git log ${BRANCH} --not master --pretty=format:"%h"`
-# RANGE="${COMMITS[${#COMMITS[@]}-1]}^..${COMMITS[0]}"
-# FILES=`git diff-tree --no-commit-id --name-only ${RANGE} -r`
-
-BASE=`git merge-base master HEAD`
-FILES=`git diff --name-only $BASE`
-
-#FILES=$(git diff --name-only master)
-
-echo "Done"
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+COMMITS=$(git log "${BRANCH}" --not master --pretty=format:"%h")
+if [ -z "$COMMITS" ]; then
+    echo
+    echo "license-header.sh: No commits on this branch different from master."
+    exit 0
+fi
+RANGE="$(echo "$COMMITS" | tail -n1)^..$(echo "$COMMITS" | head -n1)"
+FILES=$(git diff-tree --no-commit-id --name-only "${RANGE}" -r)
 
 check_header() {
-    CONTENT="`head -n3 < $1`"
+    CONTENT=$(head -n3 < "$1")
     case "$CONTENT" in
         "$HEADER"*) ;;
         *) BAD_FILES="$BAD_FILES $1" ;;
@@ -26,18 +50,17 @@ check_header() {
 }
 
 check_cmake_header() {
-    CONTENT="`head -n3 < $1`"
-
+    CONTENT=$(head -n3 < "$1")
     case "$CONTENT" in
         "$HEADER_HASH"*) ;;
-        *)
-            BAD_CMAKE="$BAD_CMAKE $1" ;;
+        *) BAD_CMAKE="$BAD_CMAKE $1" ;;
     esac
 }
+
 for file in $FILES; do
     [ -f "$file" ] || continue
 
-    if [ `basename -- "$file"` = "CMakeLists.txt" ]; then
+    if [ "$(basename -- "$file")" = "CMakeLists.txt" ]; then
         check_cmake_header "$file"
         continue
     fi
@@ -53,18 +76,20 @@ for file in $FILES; do
     esac
 done
 
-if [ "$BAD_FILES" = "" ] && [ "$BAD_CMAKE" = "" ]; then
+if [ -z "$BAD_FILES" ] && [ -z "$BAD_CMAKE" ]; then
     echo
-    echo "All good."
-
-    exit
+    echo "license-header.sh: All good!"
+    exit 0
 fi
 
-if [ "$BAD_FILES" != "" ]; then
-    echo "The following source files have incorrect license headers:"
+if [ -n "$BAD_FILES" ]; then
     echo
+    echo "license-header.sh: The following source files have incorrect license headers:"
 
-    for file in $BAD_FILES; do echo $file; done
+    echo
+    for file in $BAD_FILES; do
+        echo " - $file"
+    done
 
     cat << EOF
 
@@ -78,11 +103,14 @@ EOF
 
 fi
 
-if [ "$BAD_CMAKE" != "" ]; then
-    echo "The following CMake files have incorrect license headers:"
+if [ -n "$BAD_CMAKE" ]; then
     echo
+    echo "license-header.sh: The following CMake files have incorrect license headers:"
 
-    for file in $BAD_CMAKE; do echo $file; done
+    echo
+    for file in $BAD_CMAKE; do
+        echo " - $file"
+    done
 
     cat << EOF
 
@@ -104,42 +132,41 @@ EOF
 
 if [ "$FIX" = "true" ]; then
     echo
-    echo "FIX set to true. Fixing headers."
-    echo
+    echo "license-header.sh: FIX set to true, fixing headers..."
 
     for file in $BAD_FILES; do
-        cat $file > $file.bak
+        cp -- "$file" "$file.bak"
 
-        cat .ci/license/header.txt > $file
-        echo >> $file
-        cat $file.bak >> $file
+        cat .ci/license/header.txt > "$file"
+        echo >> "$file"
+        cat "$file.bak" >> "$file"
 
-        rm $file.bak
-
-        git add $file
+        rm -- "$file.bak"
+        git add "$file"
     done
 
     for file in $BAD_CMAKE; do
-        cat $file > $file.bak
+        cp -- "$file" "$file.bak"
 
-        cat .ci/license/header-hash.txt > $file
-        echo >> $file
-        cat $file.bak >> $file
+        cat .ci/license/header-hash.txt > "$file"
+        echo >> "$file"
+        cat "$file.bak" >> "$file"
 
-        rm $file.bak
-
-        git add $file
+        rm -- "$file.bak"
+        git add "$file"
     done
-    echo "License headers fixed."
+
+    echo
+    echo "license-header.sh: License headers fixed!"
 
     if [ "$COMMIT" = "true" ]; then
         echo
-        echo "COMMIT set to true. Committing changes."
+        echo "license-header.sh: COMMIT set to true, committing changes..."
+
+        git commit -m "[license] Fix license headers"
+
         echo
-
-        git commit -m "Fix license headers"
-
-        echo "Changes committed. You may now push."
+        echo  "license-header.sh: Changes committed. You may now push."
     fi
 else
     exit 1

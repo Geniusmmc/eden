@@ -8,4 +8,4 @@
 
 LIBS=$(find . externals src/qt_common src/dynarmic -maxdepth 2 -name cpmfile.json -exec jq -j 'keys_unsorted | join(" ")' {} \; -printf " ")
 
-tools/cpm-fetch.sh $LIBS
+tools/cpm-fetch.sh "$LIBS"
