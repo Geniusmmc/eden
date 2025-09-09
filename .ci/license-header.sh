@@ -58,7 +58,7 @@ check_cmake_header() {
 for file in $FILES; do
     [ -f "$file" ] || continue
 
-    if [ "$(basename -- "$file")" = "CMakeLists.txt" ]; then
+    if [ "$(basename "$file")" = "CMakeLists.txt" ]; then
         check_cmake_header "$file"
         continue
     fi
@@ -133,24 +133,24 @@ if [ "$FIX" = "true" ]; then
     echo "license-header.sh: FIX set to true, fixing headers..."
 
     for file in $BAD_FILES; do
-        cp -- "$file" "$file.bak"
+        cp "$file" "$file.bak"
 
         cat .ci/license/header.txt > "$file"
         echo >> "$file"
         cat "$file.bak" >> "$file"
 
-        rm -- "$file.bak"
+        rm "$file.bak"
         git add "$file"
     done
 
     for file in $BAD_CMAKE; do
-        cp -- "$file" "$file.bak"
+        cp "$file" "$file.bak"
 
         cat .ci/license/header-hash.txt > "$file"
         echo >> "$file"
         cat "$file.bak" >> "$file"
 
-        rm -- "$file.bak"
+        rm "$file.bak"
         git add "$file"
     done
 
@@ -164,8 +164,9 @@ if [ "$FIX" = "true" ]; then
         git commit -m "[license] Fix license headers"
 
         echo
-        echo  "license-header.sh: Changes committed. You may now push."
+        echo "license-header.sh: Changes committed. You may now push."
     fi
 else
     exit 1
 fi
+
