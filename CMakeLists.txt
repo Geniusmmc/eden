@@ -204,6 +204,8 @@ CMAKE_DEPENDENT_OPTION(YUZU_USE_FASTER_LD "Check if a faster linker is available
 
 CMAKE_DEPENDENT_OPTION(USE_SYSTEM_MOLTENVK "Use the system MoltenVK lib (instead of the bundled one)" OFF "APPLE" OFF)
 
+set(YUZU_TZDB_PATH "" CACHE STRING "Path to a pre-downloaded timezone database")
+
 set(DEFAULT_ENABLE_OPENSSL ON)
 if (ANDROID OR WIN32 OR APPLE OR PLATFORM_SUN)
     # - Windows defaults to the Schannel backend.
