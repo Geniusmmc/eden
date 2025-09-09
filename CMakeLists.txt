@@ -465,6 +465,7 @@ else()
     find_package(Opus 1.3 MODULE REQUIRED)
     find_package(ZLIB 1.2 REQUIRED)
     find_package(zstd 1.5 REQUIRED MODULE)
+    find_package(Boost 1.79.0 REQUIRED headers context system fiber)
 
     if (YUZU_TESTS)
         find_package(Catch2 3.0.1 REQUIRED)
