@@ -1,13 +1,17 @@
 #!/bin/sh -e
 
-# SPDX-FileCopyrightText: 2025 Eden Emulator Project
+# SPDX-FileCopyrightText: Copyright 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
+
+COPYRIGHT_YEAR="2025"
+COPYRIGHT_OWNER="Eden Emulator Project"
+COPYRIGHT_LICENSE="GPL-3.0-or-later"
 
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo
     echo "license-header.sh: Eden License Headers Accreditation Script"
     echo
-    echo "This script checks and optionally fixes license headers in source and CMake files."
+    echo "This script checks and optionally fixes license headers in source, CMake and shell script files."
     echo
     echo "Environment Variables:"
     echo "  FIX=true      Automatically add the correct license headers to offending files."
@@ -25,11 +29,11 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-HEADER="$(cat "$PWD/.ci/license/header.txt")"
-HEADER_HASH="$(cat "$PWD/.ci/license/header-hash.txt")"
+HEADER_LINE1_TEMPLATE="{COMMENT_TEMPLATE} SPDX-FileCopyrightText: Copyright $COPYRIGHT_YEAR $COPYRIGHT_OWNER"
+HEADER_LINE2_TEMPLATE="{COMMENT_TEMPLATE} SPDX-License-Identifier: $COPYRIGHT_LICENSE"
 
-echo
-echo "license-header.sh: Getting branch changes"
+SRC_FILES=""
+OTHER_FILES=""
 
 BASE=$(git merge-base master HEAD)
 if git diff --quiet "$BASE"..HEAD; then
@@ -40,119 +44,151 @@ fi
 FILES=$(git diff --name-only "$BASE")
 
 check_header() {
-    CONTENT=$(head -n3 < "$1")
-    case "$CONTENT" in
-        "$HEADER"*) ;;
-        *) BAD_FILES="$BAD_FILES $1" ;;
-    esac
-}
+    COMMENT_TYPE="$1"
+    FILE="$2"
 
-check_cmake_header() {
-    CONTENT=$(head -n3 < "$1")
-    case "$CONTENT" in
-        "$HEADER_HASH"*) ;;
-        *) BAD_CMAKE="$BAD_CMAKE $1" ;;
-    esac
+    HEADER_LINE1=$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
+    HEADER_LINE2=$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
+
+    FOUND=0
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [ "$line" = "$HEADER_LINE1" ]; then
+            IFS= read -r next_line || next_line=""
+            if [ "$next_line" = "$HEADER_LINE2" ]; then
+                FOUND=1
+                break
+            fi
+        fi
+    done < "$FILE"
+
+    if [ "$FOUND" -eq 0 ]; then
+        case "$COMMENT_TYPE" in
+            "//") SRC_FILES="$SRC_FILES $FILE" ;;
+            "#")  OTHER_FILES="$OTHER_FILES $FILE" ;;
+        esac
+    fi
 }
 
 for file in $FILES; do
     [ -f "$file" ] || continue
 
-    if [ "$(basename "$file")" = "CMakeLists.txt" ]; then
-        check_cmake_header "$file"
-        continue
-    fi
-
-    EXTENSION="${file##*.}"
-    case "$EXTENSION" in
-        kts|kt|cpp|h)
-            check_header "$file"
-            ;;
-        cmake)
-            check_cmake_header "$file"
-            ;;
+    case "$(basename "$file")" in
+        CMakeLists.txt)
+            COMMENT_TYPE="#" ;;
+        *)
+            EXT="${file##*.}"
+            case "$EXT" in
+                kts|kt|cpp|h) COMMENT_TYPE="//" ;;
+                cmake|sh)     COMMENT_TYPE="#" ;;
+                *)            continue ;;
+            esac ;;
     esac
+
+    check_header "$COMMENT_TYPE" "$file"
 done
 
-if [ -z "$BAD_FILES" ] && [ -z "$BAD_CMAKE" ]; then
+if [ -z "$SRC_FILES" ] && [ -z "$OTHER_FILES" ]; then
     echo
     echo "license-header.sh: All good!"
     exit 0
 fi
 
-if [ -n "$BAD_FILES" ]; then
-    echo
-    echo "license-header.sh: The following source files have incorrect license headers:"
+for TYPE in "SRC" "OTHER"; do
+    if [ "$TYPE" = "SRC" ] && [ -n "$SRC_FILES" ]; then
+        FILES_LIST="$SRC_FILES"
+        COMMENT_TYPE="//"
+        DESC="Source"
+    elif [ "$TYPE" = "OTHER" ] && [ -n "$OTHER_FILES" ]; then
+        FILES_LIST="$OTHER_FILES"
+        COMMENT_TYPE="#"
+        DESC="CMake and shell script"
+    else
+        continue
+    fi
 
     echo
-    for file in $BAD_FILES; do
-        echo " - $file"
+    echo "------------------------------------------------------------"
+    echo "$DESC files"
+    echo "------------------------------------------------------------"
+    echo
+    echo "  The following files contain incorrect license headers:"
+    for file in $FILES_LIST; do
+        echo "  - $file"
     done
 
-    cat << EOF
-
-The following license header should be added to the start of all offending SOURCE files:
-
-=== BEGIN ===
-$HEADER
-===  END  ===
-
-EOF
-
-fi
-
-if [ -n "$BAD_CMAKE" ]; then
     echo
-    echo "license-header.sh: The following CMake files have incorrect license headers:"
-
+    echo "  The correct license header to be added to all affected"
+    echo "  '$DESC' files is:"
     echo
-    for file in $BAD_CMAKE; do
-        echo " - $file"
-    done
-
-    cat << EOF
-
-The following license header should be added to the start of all offending CMake files:
-
-=== BEGIN ===
-$HEADER_HASH
-===  END  ===
-
-EOF
-
-fi
+    echo "=== BEGIN ==="
+    printf '%s\n%s\n' \
+        "$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")" \
+        "$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")"
+    echo "===  END  ==="
+done
 
 cat << EOF
-If some of the code in this PR is not being contributed by the original author,
-the files which have been exclusively changed by that code can be ignored.
-If this happens, this PR requirement can be bypassed once all other files are addressed.
+
+------------------------------------------------------------
+
+  If some of the code in this pull request was not contributed by the original
+  author, the files that have been modified exclusively by that code can be
+  safely ignored. In such cases, this PR requirement may be bypassed once all
+  other files have been reviewed and addressed.
 EOF
 
+TMP_DIR=$(mktemp -d /tmp/license-header.XXXXXX) || exit 1
 if [ "$FIX" = "true" ]; then
     echo
     echo "license-header.sh: FIX set to true, fixing headers..."
 
-    for file in $BAD_FILES; do
-        cp "$file" "$file.bak"
+    for file in $SRC_FILES $OTHER_FILES; do
+        BASENAME=$(basename "$file")
 
-        cat .ci/license/header.txt > "$file"
-        echo >> "$file"
-        cat "$file.bak" >> "$file"
+        case "$BASENAME" in
+            CMakeLists.txt) COMMENT_TYPE="#" ;;
+            *)
+                EXT="${file##*.}"
+                case "$EXT" in
+                    kts|kt|cpp|h) COMMENT_TYPE="//" ;;
+                    cmake|sh)     COMMENT_TYPE="#" ;;
+                    *) continue ;;
+                esac
+                ;;
+        esac
 
-        rm "$file.bak"
+        LINE1=$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
+        LINE2=$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
+
+        TMP="$TMP_DIR/$BASENAME.tmp"
+        UPDATED=0
+
+        cp -p $file $TMP
+        printf '' > $TMP
+
+        while IFS= read -r line || [ -n "$line" ]; do
+            if [ "$UPDATED" -eq 0 ] && echo "$line" | grep "$COPYRIGHT_OWNER" >/dev/null 2>&1; then
+                printf '%s\n%s\n' "$LINE1" "$LINE2" >> "$TMP"
+                IFS= read -r _ || true
+                UPDATED=1
+            else
+                printf '%s\n' "$line" >> "$TMP"
+            fi
+        done < "$file"
+
+        if [ "$UPDATED" -eq 0 ]; then
+            {
+                printf '%s\n%s\n\n' "$LINE1" "$LINE2"
+                cat "$TMP"
+            } > "$file"
+        else
+            mv "$TMP" "$file"
+        fi
+
         git add "$file"
     done
 
-    for file in $BAD_CMAKE; do
-        cp "$file" "$file.bak"
-
-        cat .ci/license/header-hash.txt > "$file"
-        echo >> "$file"
-        cat "$file.bak" >> "$file"
-
-        rm "$file.bak"
-        git add "$file"
-    done
+    rm -rf "$TMP_DIR"
 
     echo
     echo "license-header.sh: License headers fixed!"
