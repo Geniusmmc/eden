@@ -180,6 +180,7 @@ CMAKE_DEPENDENT_OPTION(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF 
 option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
 
 option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" ${EXT_DEFAULT})
+set(DYNARMIC_USE_PRECOMPILED_HEADERS YUZU_USE_PRECOMPILED_HEADERS)
 
 # TODO(crueter): CI this?
 option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
@@ -253,13 +254,25 @@ if (ANDROID)
     set(CMAKE_POLICY_VERSION_MINIMUM 3.5) # Workaround for Oboe
 endif()
 
-if (YUZU_USE_PRECOMPILED_HEADERS)
-    if (MSVC AND CCACHE)
-        # buildcache does not properly cache PCH files, leading to compilation errors.
-        # See https://github.com/mbitsnbites/buildcache/discussions/230
-        message(WARNING "buildcache does not properly support Precompiled Headers. Disabling PCH")
-        set(DYNARMIC_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
-        set(YUZU_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
+# Add option to enable CCache
+option(USE_CCACHE "Use ccache for compilation" OFF)
+set(CCACHE_PATH "ccache" CACHE STRING "Path to ccache binary")
+if(USE_CCACHE)
+    find_program(CCACHE_BINARY ${CCACHE_PATH})
+    if(CCACHE_BINARY)
+        message(STATUS "Found ccache at: ${CCACHE_BINARY}")
+        set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_BINARY})
+        set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_BINARY})
+        set(CMAKE_OBJC_COMPILER_LAUNCHER ${CCACHE_BINARY})
+        if(WIN32)
+            message(WARNING "USE_CCACHE is unstable under Windows, errors may occur...")
+            # we need to downgrade debug info (/Zi -> /Z7) to use an older but more cacheable format
+            # See https://github.com/nanoant/CMakePCHCompiler/issues/21
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+            string(REPLACE "/Zi" "/Z7" CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}")
+        endif()
+    else()
+        message(WARNING "USE_CCACHE enabled, but no executable found at: ${CCACHE_PATH}")
     endif()
 endif()
 

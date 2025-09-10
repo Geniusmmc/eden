@@ -77,12 +77,21 @@ endif()
 # Sirit
 AddJsonPackage(sirit)
 
-if(MSVC AND USE_CCACHE AND sirit_ADDED)
-    get_target_property(_opts sirit COMPILE_OPTIONS)
-    list(FILTER _opts EXCLUDE REGEX "/Zi")
-    list(APPEND _opts "/Z7")
-    set_target_properties(sirit PROPERTIES COMPILE_OPTIONS "${_opts}")
-elseif(MSVC AND CXX_CLANG)
+if(WIN32)
+    get_target_property(sirit_opts sirit COMPILE_OPTIONS)
+    # Remove Debug Info on ALL Release Builds
+    if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+        list(FILTER sirit_opts EXCLUDE REGEX "/Zi")
+    endif()
+    # Change to old-but-more-cacheable debug info WHEN using ccache
+    if(CCACHE_BINARY AND (CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo"))
+        list(FILTER sirit_opts EXCLUDE REGEX "/Zi")
+        list(APPEND sirit_opts "/Z7")
+    endif()
+    set_target_properties(sirit PROPERTIES COMPILE_OPTIONS "${sirit_opts}")
+endif()
+
+if(MSVC AND CXX_CLANG)
     target_compile_options(sirit PRIVATE -Wno-error=unused-command-line-argument)
 endif()
 

@@ -1,13 +1,14 @@
 # SPDX-FileCopyrightText: 2022 yuzu Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
-set(MINGW_PREFIX                /usr/x86_64-w64-mingw32/)
-set(CMAKE_SYSTEM_NAME           Windows)
 set(CMAKE_SYSTEM_PROCESSOR      x86_64)
+set(MINGW_FULL_PREFIX           ${CMAKE_SYSTEM_PROCESSOR}-w64-mingw32)
+set(MINGW_PREFIX                /usr/${MINGW_FULL_PREFIX}/)
+set(CMAKE_SYSTEM_NAME           Windows)
 
 set(CMAKE_FIND_ROOT_PATH        ${MINGW_PREFIX})
 set(SDL2_PATH                   ${MINGW_PREFIX})
-set(MINGW_TOOL_PREFIX           ${CMAKE_SYSTEM_PROCESSOR}-w64-mingw32-)
+set(MINGW_TOOL_PREFIX           ${MINGW_FULL_PREFIX}-)
 
 # Specify the cross compiler
 set(CMAKE_C_COMPILER            ${MINGW_TOOL_PREFIX}clang)
@@ -23,22 +24,8 @@ set(STRIP                       ${MINGW_TOOL_PREFIX}strip)
 set(WINDRES                     ${MINGW_TOOL_PREFIX}windres)
 set(ENV{PKG_CONFIG}             ${MINGW_TOOL_PREFIX}pkg-config)
 
-# ccache wrapper
-option(USE_CCACHE "Use ccache for compilation" OFF)
-if(USE_CCACHE)
-    find_program(CCACHE ccache)
-    if(CCACHE)
-        message(STATUS "Using ccache found in PATH")
-        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ${CCACHE})
-        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ${CCACHE})
-    else(CCACHE)
-        message(WARNING "USE_CCACHE enabled, but no ccache found")
-    endif(CCACHE)
-endif(USE_CCACHE)
-
 # Search for programs in the build host directories
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-
 
 # Echo modified cmake vars to screen for debugging purposes
 if(NOT DEFINED ENV{MINGW_DEBUG_INFO})
