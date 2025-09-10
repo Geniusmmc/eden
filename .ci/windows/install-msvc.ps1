@@ -40,10 +40,3 @@ if ($ExitCode -ne 0) {
 }
 
 Write-Host "Finished installing Visual Studio Build Tools"
-
-# Add paths to GitHub Actions environment if running in CI
-if ("$env:GITHUB_ACTIONS" -eq "true") {
-    $VSPath = Join-Path $VSROOT "VC\Tools\MSVC"
-    Write-Host "Adding Visual Studio paths to GitHub Actions environment"
-    echo "$VSPath\bin\Hostx64\x64" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-}
