@@ -597,6 +597,10 @@ find_package(libusb)
 find_package(VulkanMemoryAllocator)
 find_package(SPIRV-Tools)
 
+if (ARCHITECTURE_x86 OR ARCHITECTURE_x86_64)
+    find_package(xbyak)
+endif()
+
 if (ENABLE_WEB_SERVICE)
     find_package(httplib)
 endif()
