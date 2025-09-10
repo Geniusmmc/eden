@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# SPDX-FileCopyrightText: 2025 eden Emulator Project
+# SPDX-FileCopyrightText: 2025 Eden Emulator Project
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 case "$1" in
@@ -52,8 +52,6 @@ native)
     ;;
 esac
 
-export ARCH_FLAGS="$ARCH_FLAGS -O3"
-
 if [ -z "$NPROC" ]; then
     NPROC="$(nproc)"
 fi
@@ -61,53 +59,39 @@ fi
 if [ "$1" != "" ]; then shift; fi
 
 if [ "$TARGET" = "appimage" ]; then
-    export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON -DYUZU_ROOM_STANDALONE=OFF -DYUZU_CMD=OFF)
+    export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DCMAKE_INSTALL_PREFIX=/usr -DYUZU_ROOM=ON)
 else
     # For the linux-fresh verification target, verify compilation without PCH as well.
     export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DYUZU_USE_PRECOMPILED_HEADERS=OFF)
 fi
 
-if [ "$DEVEL" != "true" ]; then
-    export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DENABLE_QT_UPDATE_CHECKER=ON)
-fi
-
-if [ "$USE_WEBENGINE" = "true" ]; then
-    WEBENGINE=ON
-else
-    WEBENGINE=OFF
-fi
-
-if [ "$USE_MULTIMEDIA" = "false" ]; then
-    MULTIMEDIA=OFF
-else
-    MULTIMEDIA=ON
-fi
-
-if [ -z "$BUILD_TYPE" ]; then
-    export BUILD_TYPE="Release"
-fi
-
-export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" $@)
+echo "${EXTRA_CMAKE_FLAGS[@]}"
 
 mkdir -p build && cd build
 cmake .. -G Ninja \
-    -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+    -DCMAKE_BUILD_TYPE="${BUILD_TYPE:-Release}" \
     -DENABLE_QT_TRANSLATION=ON \
     -DUSE_DISCORD_PRESENCE=ON \
-    -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" \
-    -DCMAKE_C_FLAGS="$ARCH_FLAGS" \
-    -DYUZU_USE_BUNDLED_QT=OFF \
     -DYUZU_USE_BUNDLED_SDL2=OFF \
     -DYUZU_USE_EXTERNAL_SDL2=ON \
+    -DBUILD_TESTING=OFF \
     -DYUZU_TESTS=OFF \
-    -DYUZU_USE_QT_MULTIMEDIA=$MULTIMEDIA \
-    -DYUZU_USE_QT_WEB_ENGINE=$WEBENGINE \
-    -DYUZU_USE_FASTER_LD=ON \
+    -DDYNARMIC_TESTS=OFF \
+    -DYUZU_CMD=OFF \
+    -DYUZU_ROOM_STANDALONE=OFF \
+    -DYUZU_USE_QT_MULTIMEDIA="${USE_MULTIMEDIA:-false}" \
+    -DYUZU_USE_QT_WEB_ENGINE="${USE_WEBENGINE:-false}" \
     -DYUZU_ENABLE_LTO=ON \
     -DDYNARMIC_ENABLE_LTO=ON \
+    -DYUZU_USE_BUNDLED_QT="${BUNDLE_QT:-false}" \
+    -DUSE_CCACHE="${CCACHE:-false}" \
+    -DENABLE_QT_UPDATE_CHECKER="${DEVEL:-true}" \
+    -DYUZU_USE_FASTER_LD=ON \
+    -DCMAKE_CXX_FLAGS="$ARCH_FLAGS" \
+    -DCMAKE_C_FLAGS="$ARCH_FLAGS" \
     "${EXTRA_CMAKE_FLAGS[@]}"
 
-ninja -j${NPROC}
+ninja -j"${NPROC}"
 
 if [ -d "bin/Release" ]; then
     strip -s bin/Release/*
