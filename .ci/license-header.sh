@@ -79,7 +79,7 @@ for file in $FILES; do
             EXT="${file##*.}"
             case "$EXT" in
                 kts|kt|cpp|h) COMMENT_TYPE="//" ;;
-                cmake|sh)     COMMENT_TYPE="#" ;;
+                cmake|sh|ps1) COMMENT_TYPE="#" ;;
                 *)            continue ;;
             esac ;;
     esac
@@ -151,7 +151,7 @@ if [ "$FIX" = "true" ]; then
                 EXT="${file##*.}"
                 case "$EXT" in
                     kts|kt|cpp|h) COMMENT_TYPE="//" ;;
-                    cmake|sh)     COMMENT_TYPE="#" ;;
+                    cmake|sh|ps1) COMMENT_TYPE="#" ;;
                     *) continue ;;
                 esac
                 ;;
@@ -197,7 +197,7 @@ if [ "$FIX" = "true" ]; then
         echo
         echo "license-header.sh: COMMIT set to true, committing changes..."
 
-        git commit -m "[license] Fix license headers"
+        git commit -m "[license] Fix license headers [script]"
 
         echo
         echo "license-header.sh: Changes committed. You may now push."
