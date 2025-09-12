@@ -29,9 +29,6 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     exit 0
 fi
 
-HEADER_LINE1_TEMPLATE="{COMMENT_TEMPLATE} SPDX-FileCopyrightText: Copyright $COPYRIGHT_YEAR $COPYRIGHT_OWNER"
-HEADER_LINE2_TEMPLATE="{COMMENT_TEMPLATE} SPDX-License-Identifier: $COPYRIGHT_LICENSE"
-
 SRC_FILES=""
 OTHER_FILES=""
 
@@ -43,30 +40,10 @@ if git diff --quiet "$BASE"..HEAD; then
 fi
 FILES=$(git diff --name-only "$BASE")
 
-check_header() {
+echo_header() {
     COMMENT_TYPE="$1"
-    FILE="$2"
-
-    HEADER_LINE1=$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
-    HEADER_LINE2=$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
-
-    FOUND=0
-    while IFS= read -r line || [ -n "$line" ]; do
-        if [ "$line" = "$HEADER_LINE1" ]; then
-            IFS= read -r next_line || next_line=""
-            if [ "$next_line" = "$HEADER_LINE2" ]; then
-                FOUND=1
-                break
-            fi
-        fi
-    done < "$FILE"
-
-    if [ "$FOUND" -eq 0 ]; then
-        case "$COMMENT_TYPE" in
-            "//") SRC_FILES="$SRC_FILES $FILE" ;;
-            "#")  OTHER_FILES="$OTHER_FILES $FILE" ;;
-        esac
-    fi
+    echo "$COMMENT_TYPE SPDX-FileCopyrightText: Copyright $COPYRIGHT_YEAR $COPYRIGHT_OWNER"
+    echo "$COMMENT_TYPE SPDX-License-Identifier: $COPYRIGHT_LICENSE"
 }
 
 for file in $FILES; do
@@ -84,7 +61,20 @@ for file in $FILES; do
             esac ;;
     esac
 
-    check_header "$COMMENT_TYPE" "$file"
+    HEADER=$(echo_header "$COMMENT_TYPE")
+    HEAD_LINES=$(head -n5 "$file")
+
+    CORRECT_COPYRIGHT=$(echo "$HEAD_LINES" | awk \
+        -v line1="$(echo "$HEADER" | sed -n '1p')" \
+        -v line2="$(echo "$HEADER" | sed -n '2p')" \
+        '($0==line1){getline; if($0==line2){f=1}else{f=0}} END{print (f?f:0)}')
+
+    if [ "$CORRECT_COPYRIGHT" != "1" ]; then
+        case "$COMMENT_TYPE" in
+            "//") SRC_FILES="$SRC_FILES $file" ;;
+            "#")  OTHER_FILES="$OTHER_FILES $file" ;;
+        esac
+    fi
 done
 
 if [ -z "$SRC_FILES" ] && [ -z "$OTHER_FILES" ]; then
@@ -121,9 +111,7 @@ for TYPE in "SRC" "OTHER"; do
     echo "  '$DESC' files is:"
     echo
     echo "=== BEGIN ==="
-    printf '%s\n%s\n' \
-        "$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")" \
-        "$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")"
+    echo_header "$COMMENT_TYPE"
     echo "===  END  ==="
 done
 
@@ -157,28 +145,27 @@ if [ "$FIX" = "true" ]; then
                 ;;
         esac
 
-        LINE1=$(printf '%s\n' "$HEADER_LINE1_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
-        LINE2=$(printf '%s\n' "$HEADER_LINE2_TEMPLATE" | sed "s|{COMMENT_TEMPLATE}|$COMMENT_TYPE|g")
-
         TMP="$TMP_DIR/$BASENAME.tmp"
         UPDATED=0
+        cp -p "$file" "$TMP"
+        > "$TMP"
 
-        cp -p $file $TMP
-        printf '' > $TMP
-
+        # this logic is bit hacky but sed don't work well with $VARIABLES
+        # it's this or complete remove this logic and keep only the old way
         while IFS= read -r line || [ -n "$line" ]; do
             if [ "$UPDATED" -eq 0 ] && echo "$line" | grep "$COPYRIGHT_OWNER" >/dev/null 2>&1; then
-                printf '%s\n%s\n' "$LINE1" "$LINE2" >> "$TMP"
+                echo_header "$COMMENT_TYPE" >> "$TMP"
                 IFS= read -r _ || true
                 UPDATED=1
             else
-                printf '%s\n' "$line" >> "$TMP"
+                echo "$line" >> "$TMP"
             fi
         done < "$file"
 
         if [ "$UPDATED" -eq 0 ]; then
             {
-                printf '%s\n%s\n\n' "$LINE1" "$LINE2"
+                echo_header "$COMMENT_TYPE"
+                echo
                 cat "$TMP"
             } > "$file"
         else
