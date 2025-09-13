@@ -3,9 +3,11 @@
 
 package org.yuzu.yuzu_emu.fragments
 
+import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.os.Bundle
+import android.provider.DocumentsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
+import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -29,12 +32,14 @@ import org.yuzu.yuzu_emu.R
 import org.yuzu.yuzu_emu.YuzuApplication
 import org.yuzu.yuzu_emu.adapters.GamePropertiesAdapter
 import org.yuzu.yuzu_emu.databinding.FragmentGamePropertiesBinding
+import org.yuzu.yuzu_emu.features.DocumentProvider
 import org.yuzu.yuzu_emu.features.settings.model.Settings
 import org.yuzu.yuzu_emu.model.DriverViewModel
 import org.yuzu.yuzu_emu.model.GameProperty
 import org.yuzu.yuzu_emu.model.GamesViewModel
 import org.yuzu.yuzu_emu.model.HomeViewModel
 import org.yuzu.yuzu_emu.model.InstallableProperty
+import org.yuzu.yuzu_emu.model.SubMenuProperSecondaryAction
 import org.yuzu.yuzu_emu.model.SubmenuProperty
 import org.yuzu.yuzu_emu.model.TaskState
 import org.yuzu.yuzu_emu.utils.DirectoryInitialization
@@ -137,25 +142,44 @@ class GamePropertiesFragment : Fragment() {
                 SubmenuProperty(
                     R.string.info,
                     R.string.info_description,
-                    R.drawable.ic_info_outline
-                ) {
-                    val action = GamePropertiesFragmentDirections
-                        .actionPerGamePropertiesFragmentToGameInfoFragment(args.game)
-                    binding.root.findNavController().navigate(action)
-                }
+                    R.drawable.ic_info_outline,
+                    action = {
+                        val action = GamePropertiesFragmentDirections
+                            .actionPerGamePropertiesFragmentToGameInfoFragment(args.game)
+                        binding.root.findNavController().navigate(action)
+                    }
+                )
             )
             add(
                 SubmenuProperty(
                     R.string.preferences_settings,
                     R.string.per_game_settings_description,
-                    R.drawable.ic_settings
-                ) {
-                    val action = HomeNavigationDirections.actionGlobalSettingsActivity(
-                        args.game,
-                        Settings.MenuTag.SECTION_ROOT
+                    R.drawable.ic_settings,
+                    action = {
+                        val action = HomeNavigationDirections.actionGlobalSettingsActivity(
+                            args.game,
+                            Settings.MenuTag.SECTION_ROOT
+                        )
+                        binding.root.findNavController().navigate(action)
+                    },
+                    secondaryAction = SubMenuProperSecondaryAction(
+                        isShown = File(
+                            DirectoryInitialization.userDirectory +
+                                    "/config/custom/" + args.game.settingsName + ".ini"
+                        ).exists(),
+                        descriptionId = R.string.share_game_settings,
+                        iconId = R.drawable.ic_share,
+                        action = {
+                            val configFile = File(
+                                DirectoryInitialization.userDirectory +
+                                    "/config/custom/" + args.game.settingsName + ".ini"
+                            )
+                            if (configFile.exists()) {
+                                shareConfigFile(configFile)
+                            }
+                        }
                     )
-                    binding.root.findNavController().navigate(action)
-                }
+                )
             )
 
             if (GpuDriverHelper.supportsCustomDriverLoading()) {
@@ -164,12 +188,13 @@ class GamePropertiesFragment : Fragment() {
                         R.string.gpu_driver_manager,
                         R.string.install_gpu_driver_description,
                         R.drawable.ic_build,
-                        detailsFlow = driverViewModel.selectedDriverTitle
-                    ) {
-                        val action = GamePropertiesFragmentDirections
-                            .actionPerGamePropertiesFragmentToDriverManagerFragment(args.game)
-                        binding.root.findNavController().navigate(action)
-                    }
+                        detailsFlow = driverViewModel.selectedDriverTitle,
+                        action = {
+                            val action = GamePropertiesFragmentDirections
+                                .actionPerGamePropertiesFragmentToDriverManagerFragment(args.game)
+                            binding.root.findNavController().navigate(action)
+                        }
+                    )
                 )
             }
 
@@ -178,12 +203,13 @@ class GamePropertiesFragment : Fragment() {
                     SubmenuProperty(
                         R.string.add_ons,
                         R.string.add_ons_description,
-                        R.drawable.ic_edit
-                    ) {
-                        val action = GamePropertiesFragmentDirections
-                            .actionPerGamePropertiesFragmentToAddonsFragment(args.game)
-                        binding.root.findNavController().navigate(action)
-                    }
+                        R.drawable.ic_edit,
+                        action = {
+                            val action = GamePropertiesFragmentDirections
+                                .actionPerGamePropertiesFragmentToAddonsFragment(args.game)
+                            binding.root.findNavController().navigate(action)
+                        }
+                    )
                 )
                 add(
                     InstallableProperty(
@@ -245,7 +271,7 @@ class GamePropertiesFragment : Fragment() {
                             R.string.clear_shader_cache,
                             R.string.clear_shader_cache_description,
                             R.drawable.ic_delete,
-                            {
+                            details = {
                                 if (shaderCacheDir.exists()) {
                                     val bytes = shaderCacheDir.walkTopDown().filter { it.isFile }
                                         .map { it.length() }.sum()
@@ -253,23 +279,24 @@ class GamePropertiesFragment : Fragment() {
                                 } else {
                                     MemoryUtil.bytesToSizeUnit(0f)
                                 }
+                            },
+                            action = {
+                                MessageDialogFragment.newInstance(
+                                    requireActivity(),
+                                    titleId = R.string.clear_shader_cache,
+                                    descriptionId = R.string.clear_shader_cache_warning_description,
+                                    positiveAction = {
+                                        shaderCacheDir.deleteRecursively()
+                                        Toast.makeText(
+                                            YuzuApplication.appContext,
+                                            R.string.cleared_shaders_successfully,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        homeViewModel.reloadPropertiesList(true)
+                                    }
+                                ).show(parentFragmentManager, MessageDialogFragment.TAG)
                             }
-                        ) {
-                            MessageDialogFragment.newInstance(
-                                requireActivity(),
-                                titleId = R.string.clear_shader_cache,
-                                descriptionId = R.string.clear_shader_cache_warning_description,
-                                positiveAction = {
-                                    shaderCacheDir.deleteRecursively()
-                                    Toast.makeText(
-                                        YuzuApplication.appContext,
-                                        R.string.cleared_shaders_successfully,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    homeViewModel.reloadPropertiesList(true)
-                                }
-                            ).show(parentFragmentManager, MessageDialogFragment.TAG)
-                        }
+                        )
                     )
                 }
             }
@@ -284,6 +311,7 @@ class GamePropertiesFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         driverViewModel.updateDriverNameForGame(args.game)
+        reloadList()
     }
 
     private fun setInsets() =
@@ -420,4 +448,30 @@ class GamePropertiesFragment : Fragment() {
             }
         }.show(parentFragmentManager, ProgressDialogFragment.TAG)
     }
+
+    private fun shareConfigFile(configFile: File) {
+        val file = DocumentFile.fromSingleUri(
+            requireContext(),
+            DocumentsContract.buildDocumentUri(
+                DocumentProvider.AUTHORITY,
+                "${DocumentProvider.ROOT_ID}/${configFile}"
+            )
+        )!!
+
+        val intent = Intent(Intent.ACTION_SEND)
+            .setDataAndType(file.uri, FileUtil.TEXT_PLAIN)
+            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (file.exists()) {
+            intent.putExtra(Intent.EXTRA_STREAM, file.uri)
+            startActivity(Intent.createChooser(intent, getText(R.string.share_game_settings)))
+        } else {
+            Toast.makeText(
+                requireContext(),
+                getText(R.string.share_config_failed),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    }
+
 }
