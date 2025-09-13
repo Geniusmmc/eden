@@ -752,6 +752,9 @@
     <string name="updates_and_dlc">Updates and DLC</string>
     <string name="mods_and_cheats">Mods and cheats</string>
     <string name="addon_notice">Important addon notice</string>
+    <string name="share_game_settings">Share Game Settings</string>
+    <string name="share_config_failed">Failed to share configuration file</string>
+
     <!-- "cheats/" "romfs/" and "exefs/ should not be translated -->
     <string name="addon_notice_description">In order to install mods and cheats, you must select a folder that contains a cheats/, romfs/, or exefs/ directory. We can\'t verify if these will be compatible with your game so be careful!</string>
     <string name="invalid_directory">Invalid directory</string>

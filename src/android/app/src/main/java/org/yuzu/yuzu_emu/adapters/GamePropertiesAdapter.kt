@@ -83,6 +83,17 @@ class GamePropertiesAdapter(
             } else {
                 binding.details.setVisible(false)
             }
+
+            if (submenuProperty.secondaryAction != null) {
+                binding.buttonSecondaryAction.setVisible(submenuProperty.secondaryAction.isShown)
+                binding.buttonSecondaryAction.setIconResource(submenuProperty.secondaryAction.iconId)
+                binding.buttonSecondaryAction.contentDescription = binding.buttonSecondaryAction.context.getString(submenuProperty.secondaryAction.descriptionId)
+                binding.buttonSecondaryAction.setOnClickListener {
+                    submenuProperty.secondaryAction.action.invoke()
+                }
+            } else {
+                binding.buttonSecondaryAction.setVisible(false)
+            }
         }
     }
 

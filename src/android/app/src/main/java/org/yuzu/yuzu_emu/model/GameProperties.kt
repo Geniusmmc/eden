@@ -24,8 +24,16 @@ data class SubmenuProperty(
     override val iconId: Int,
     val details: (() -> String)? = null,
     val detailsFlow: StateFlow<String>? = null,
-    val action: () -> Unit
+    val action: () -> Unit,
+    val secondaryAction: SubMenuProperSecondaryAction? = null
 ) : GameProperty
+
+data class SubMenuProperSecondaryAction(
+    val isShown : Boolean,
+    val descriptionId: Int,
+    val iconId: Int,
+    val action: () -> Unit
+)
 
 data class InstallableProperty(
     override val titleId: Int,

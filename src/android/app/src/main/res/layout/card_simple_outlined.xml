@@ -67,6 +67,17 @@
 
         </LinearLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonSecondaryAction"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"
+            app:iconSize="20dp"
+            tools:visibility="visible"
+            tools:icon="@drawable/ic_info_outline" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>
