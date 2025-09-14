@@ -14,8 +14,9 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "This script checks and optionally fixes license headers in source, CMake and shell script files."
     echo
     echo "Environment Variables:"
-    echo "  FIX=true      Automatically add the correct license headers to offending files."
-    echo "  COMMIT=true   If FIX=true, commit the changes automatically."
+    echo "  FIX=true    | Automatically add the correct license headers to offending files."
+    echo "  UPDATE=true | Automatically update current license headers of offending files."
+    echo "  COMMIT=true | If FIX=true, commit the changes automatically."
     echo
     echo "Usage Examples:"
     echo "  # Just check headers (will fail if headers are missing)"
@@ -24,8 +25,18 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  # Fix headers only"
     echo "  FIX=true .ci/license-header.sh"
     echo
+    echo "  # Update headers only"
+    echo "  #   if COPYRIGHT_OWNER is '$COPYRIGHT_OWNER'"
+    echo "  #   or else will have 'FIX=true' behavior)"
+    echo "  UPDATE=true .ci/license-header.sh"
+    echo
     echo "  # Fix headers and commit changes"
     echo "  FIX=true COMMIT=true .ci/license-header.sh"
+    echo
+    echo "  # Update headers and commit changes"
+    echo "  #   if COPYRIGHT_OWNER is '$COPYRIGHT_OWNER'"
+    echo "  #   or else will have 'FIX=true' behavior)"
+    echo "  UPDATE=true COMMIT=true .ci/license-header.sh"
     exit 0
 fi
 
@@ -126,7 +137,7 @@ cat << EOF
 EOF
 
 TMP_DIR=$(mktemp -d /tmp/license-header.XXXXXX) || exit 1
-if [ "$FIX" = "true" ]; then
+if [ "$FIX" = "true" ] || [ "$UPDATE" = "true" ]; then
     echo
     echo "license-header.sh: FIX set to true, fixing headers..."
 
@@ -152,15 +163,17 @@ if [ "$FIX" = "true" ]; then
 
         # this logic is bit hacky but sed don't work well with $VARIABLES
         # it's this or complete remove this logic and keep only the old way
-        while IFS= read -r line || [ -n "$line" ]; do
-            if [ "$UPDATED" -eq 0 ] && echo "$line" | grep "$COPYRIGHT_OWNER" >/dev/null 2>&1; then
-                echo_header "$COMMENT_TYPE" >> "$TMP"
-                IFS= read -r _ || true
-                UPDATED=1
-            else
-                echo "$line" >> "$TMP"
-            fi
-        done < "$file"
+        if [ "$UPDATE" = "true" ]; then
+            while IFS= read -r line || [ -n "$line" ]; do
+                if [ "$UPDATED" -eq 0 ] && echo "$line" | grep "$COPYRIGHT_OWNER" >/dev/null 2>&1; then
+                    echo_header "$COMMENT_TYPE" >> "$TMP"
+                    IFS= read -r _ || true
+                    UPDATED=1
+                else
+                    echo "$line" >> "$TMP"
+                fi
+            done < "$file"
+        fi
 
         if [ "$UPDATED" -eq 0 ]; then
             {
