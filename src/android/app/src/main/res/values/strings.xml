@@ -9,6 +9,29 @@
     <string name="notice_notification_channel_description">Shows notifications when something goes wrong.</string>
     <string name="notification_permission_not_granted">Notification permission not granted!</string>
 
+    <!-- Input Overlay -->
+    <string name="overlay_auto_hide">Overlay Auto Hide</string>
+    <string name="overlay_auto_hide_description">Automatically hide the touch controls overlay after the specified time of inactivity. Select "Never" to keep the overlay always visible.</string>
+
+    <string name="overlay_auto_hide_never">Never</string>
+    <string name="overlay_auto_hide_instant">Instantly</string>
+    <string name="overlay_auto_hide_5s">5 seconds</string>
+    <string name="overlay_auto_hide_10s">10 seconds</string>
+    <string name="overlay_auto_hide_15s">15 seconds</string>
+    <string name="overlay_auto_hide_20s">20 seconds</string>
+    <string name="overlay_auto_hide_25s">25 seconds</string>
+    <string name="overlay_auto_hide_30s">30 seconds</string>
+    <string name="overlay_auto_hide_35s">35 seconds</string>
+    <string name="overlay_auto_hide_40s">40 seconds</string>
+    <string name="overlay_auto_hide_45s">45 seconds</string>
+    <string name="overlay_auto_hide_50s">50 seconds</string>
+    <string name="overlay_auto_hide_55s">55 seconds</string>
+    <string name="overlay_auto_hide_60s">1 minute</string>
+
+    <string name="input_overlay_options">Input Overlay</string>
+    <string name="input_overlay_options_description">Configure on-screen controls</string>
+
+
     <!-- Stats Overlay settings -->
     <string name="enhanced_fps_suffix">(Enhanced)</string>
     <string name="process_ram">Process RAM: %1$d MB</string>

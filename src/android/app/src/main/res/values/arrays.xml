@@ -497,6 +497,40 @@
         <item>1</item>
     </integer-array>
 
+    <string-array name="overlayAutoHideEntries">
+        <item>@string/overlay_auto_hide_never</item>
+        <item>@string/overlay_auto_hide_instant</item>
+        <item>@string/overlay_auto_hide_5s</item>
+        <item>@string/overlay_auto_hide_10s</item>
+        <item>@string/overlay_auto_hide_15s</item>
+        <item>@string/overlay_auto_hide_20s</item>
+        <item>@string/overlay_auto_hide_25s</item>
+        <item>@string/overlay_auto_hide_30s</item>
+        <item>@string/overlay_auto_hide_35s</item>
+        <item>@string/overlay_auto_hide_40s</item>
+        <item>@string/overlay_auto_hide_45s</item>
+        <item>@string/overlay_auto_hide_50s</item>
+        <item>@string/overlay_auto_hide_55s</item>
+        <item>@string/overlay_auto_hide_60s</item>
+    </string-array>
+
+    <integer-array name="overlayAutoHideValues">
+        <item>0</item>
+        <item>1</item>
+        <item>5</item>
+        <item>10</item>
+        <item>15</item>
+        <item>20</item>
+        <item>25</item>
+        <item>30</item>
+        <item>35</item>
+        <item>40</item>
+        <item>45</item>
+        <item>50</item>
+        <item>55</item>
+        <item>60</item>
+    </integer-array>
+
     <string-array name="dynaStateEntries">
         <item>@string/disabled</item>
         <item>1</item>

@@ -392,6 +392,15 @@ abstract class SettingsItem(
                     warningMessage = R.string.warning_resolution
                 )
             )
+            put(
+                SingleChoiceSetting(
+                    IntSetting.INPUT_OVERLAY_AUTO_HIDE,
+                    titleId = R.string.overlay_auto_hide,
+                    descriptionId = R.string.overlay_auto_hide_description,
+                    choicesId = R.array.overlayAutoHideEntries,
+                    valuesId = R.array.overlayAutoHideValues,
+                )
+            )
 
             put(
                 SwitchSetting(
