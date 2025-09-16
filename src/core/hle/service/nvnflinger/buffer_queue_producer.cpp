@@ -78,7 +78,7 @@ Status BufferQueueProducer::SetBufferCount(s32 buffer_count) {
             return Status::BadValue;
         }
 
-               // There must be no dequeued buffers when changing the buffer count.
+        // There must be no dequeued buffers when changing the buffer count.
         for (s32 s{}; s < BufferQueueDefs::NUM_BUFFER_SLOTS; ++s) {
             if (slots[s].buffer_state == BufferState::Dequeued) {
                 LOG_ERROR(Service_Nvnflinger, "buffer owned by producer");
@@ -99,8 +99,8 @@ Status BufferQueueProducer::SetBufferCount(s32 buffer_count) {
             return Status::BadValue;
         }
 
-               // Here we are guaranteed that the producer doesn't have any dequeued buffers and will
-               // release all of its buffer references.
+        // Here we are guaranteed that the producer doesn't have any dequeued buffers and will
+        // release all of its buffer references.
         if (core->GetPreallocatedBufferCountLocked() <= 0) {
             core->FreeAllBuffersLocked();
         }
@@ -111,7 +111,7 @@ Status BufferQueueProducer::SetBufferCount(s32 buffer_count) {
         listener = core->consumer_listener;
     }
 
-           // Call back without lock held
+    // Call back without lock held
     if (listener != nullptr) {
         listener->OnBuffersReleased();
     }
@@ -137,7 +137,7 @@ Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, St
             }
         }
 
-               // Free up any buffers that are in slots beyond the max buffer count
+        // Free up any buffers that are in slots beyond the max buffer count
         for (s32 s = max_buffer_count; s < BufferQueueDefs::NUM_BUFFER_SLOTS; ++s) {
             ASSERT(slots[s].buffer_state == BufferState::Free);
             if (slots[s].graphic_buffer != nullptr && slots[s].buffer_state == BufferState::Free &&
@@ -147,7 +147,7 @@ Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, St
             }
         }
 
-               // Look for a free buffer to give to the client
+        // Look for a free buffer to give to the client
         *found = BufferQueueCore::INVALID_BUFFER_SLOT;
         s32 dequeued_count{};
         s32 acquired_count{};
@@ -172,16 +172,16 @@ Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, St
             }
         }
 
-               // Producers are not allowed to dequeue more than one buffer if they did not set a buffer
-               // count
+        // Producers are not allowed to dequeue more than one buffer if they did not set a buffer
+        // count
         if (!core->override_max_buffer_count && dequeued_count) {
             LOG_ERROR(Service_Nvnflinger,
                       "can't dequeue multiple buffers without setting the buffer count");
             return Status::InvalidOperation;
         }
 
-               // See whether a buffer has been queued since the last SetBufferCount so we know whether to
-               // perform the min undequeued buffers check below
+        // See whether a buffer has been queued since the last SetBufferCount so we know whether to
+        // perform the min undequeued buffers check below
         if (core->buffer_has_been_queued) {
             // Make sure the producer is not trying to dequeue more buffers than allowed
             const s32 new_undequeued_count = max_buffer_count - (dequeued_count + 1);
@@ -194,16 +194,16 @@ Status BufferQueueProducer::WaitForFreeSlotThenRelock(bool async, s32* found, St
             }
         }
 
-               // If we disconnect and reconnect quickly, we can be in a state where our slots are empty
-               // but we have many buffers in the queue. This can cause us to run out of memory if we
-               // outrun the consumer. Wait here if it looks like we have too many buffers queued up.
+        // If we disconnect and reconnect quickly, we can be in a state where our slots are empty
+        // but we have many buffers in the queue. This can cause us to run out of memory if we
+        // outrun the consumer. Wait here if it looks like we have too many buffers queued up.
         const bool too_many_buffers = core->queue.size() > static_cast<size_t>(max_buffer_count);
         if (too_many_buffers) {
             LOG_ERROR(Service_Nvnflinger, "queue size is {}, waiting", core->queue.size());
         }
 
-               // If no buffer is found, or if the queue has too many buffers outstanding, wait for a
-               // buffer to be acquired or released, or for the max buffer count to change.
+        // If no buffer is found, or if the queue has too many buffers outstanding, wait for a
+        // buffer to be acquired or released, or for the max buffer count to change.
         try_again = (*found == BufferQueueCore::INVALID_BUFFER_SLOT) || too_many_buffers;
         if (try_again) {
             // Return an error if we're in non-blocking mode (producer and consumer are controlled
@@ -243,7 +243,7 @@ Status BufferQueueProducer::DequeueBuffer(s32* out_slot, Fence* out_fence, bool 
             format = core->default_buffer_format;
         }
 
-               // Enable the usage bits the consumer requested
+        // Enable the usage bits the consumer requested
         usage |= core->consumer_usage_bit;
 
         s32 found{};
@@ -252,7 +252,7 @@ Status BufferQueueProducer::DequeueBuffer(s32* out_slot, Fence* out_fence, bool 
             return status;
         }
 
-               // This should not happen
+        // This should not happen
         if (found == BufferQueueCore::INVALID_BUFFER_SLOT) {
             LOG_ERROR(Service_Nvnflinger, "no available buffer slots");
             return Status::Busy;
@@ -364,7 +364,7 @@ Status BufferQueueProducer::DetachNextBuffer(std::shared_ptr<GraphicBuffer>* out
         return Status::NoInit;
     }
 
-           // Find the oldest valid slot
+    // Find the oldest valid slot
     int found = BufferQueueCore::INVALID_BUFFER_SLOT;
     for (int s = 0; s < BufferQueueDefs::NUM_BUFFER_SLOTS; ++s) {
         if (slots[s].buffer_state == BufferState::Free && slots[s].graphic_buffer != nullptr) {
@@ -410,7 +410,7 @@ Status BufferQueueProducer::AttachBuffer(s32* out_slot,
         return status;
     }
 
-           // This should not happen
+    // This should not happen
     if (found == BufferQueueCore::INVALID_BUFFER_SLOT) {
         LOG_ERROR(Service_Nvnflinger, "No available buffer slots");
         return Status::Busy;
@@ -550,7 +550,7 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
                 if (core->StillTracking(*front)) {
                     slots[front->slot].buffer_state = BufferState::Free;
 
-                           // Mark tracked buffer history records as free
+                    // Mark tracked buffer history records as free
                     for (auto& buffer_history_record : core->buffer_history) {
                         if (buffer_history_record.frame_number == front->frame_number) {
                             buffer_history_record.state = BufferState::Free;
@@ -558,8 +558,8 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
                         }
                     }
 
-                           // Reset the frame number of the freed buffer so that it is the first in line to
-                           // be dequeued again
+                    // Reset the frame number of the freed buffer so that it is the first in line to
+                    // be dequeued again
                     slots[front->slot].frame_number = 0;
                 }
                 // Overwrite the droppable buffer with the incoming one
@@ -577,17 +577,17 @@ Status BufferQueueProducer::QueueBuffer(s32 slot, const QueueBufferInput& input,
         output->Inflate(core->default_width, core->default_height, core->transform_hint,
                         static_cast<u32>(core->queue.size()));
 
-               // Take a ticket for the callback functions
+        // Take a ticket for the callback functions
         callback_ticket = next_callback_ticket++;
     }
 
-           // Don't send the GraphicBuffer through the callback, and don't send the slot number, since the
-           // consumer shouldn't need it
+    // Don't send the GraphicBuffer through the callback, and don't send the slot number, since the
+    // consumer shouldn't need it
     item.graphic_buffer.reset();
     item.slot = BufferItem::INVALID_BUFFER_SLOT;
 
-           // Call back without the main BufferQueue lock held, but with the callback lock held so we can
-           // ensure that callbacks occur in order
+    // Call back without the main BufferQueue lock held, but with the callback lock held so we can
+    // ensure that callbacks occur in order
     {
         std::scoped_lock lock{callback_mutex};
         while (callback_ticket != current_callback_ticket) {
@@ -805,8 +805,8 @@ Status BufferQueueProducer::SetPreallocatedBuffer(s32 slot,
     slots[slot].graphic_buffer = std::make_shared<GraphicBuffer>(nvmap, buffer);
     slots[slot].frame_number = 0;
 
-           // Most games preallocate a buffer and pass a valid buffer here. However, it is possible for
-           // this to be called with an empty buffer, Naruto Ultimate Ninja Storm is a game that does this.
+    // Most games preallocate a buffer and pass a valid buffer here. However, it is possible for
+    // this to be called with an empty buffer, Naruto Ultimate Ninja Storm is a game that does this.
     if (buffer) {
         slots[slot].is_preallocated = true;
 
@@ -968,8 +968,8 @@ void BufferQueueProducer::Transact(u32 code, std::span<const u8> parcel_data,
                 index_reversed = (current_history_pos + history_max - i) % history_max;
                 const auto& current_history_buffer = core->buffer_history[index_reversed];
 
-                       // Here we use the frame number as a terminator.
-                       // Because a buffer without frame_number is not considered complete
+                // Here we use the frame number as a terminator.
+                // Because a buffer without frame_number is not considered complete
                 if (current_history_buffer.frame_number == 0) {
                     break;
                 }
