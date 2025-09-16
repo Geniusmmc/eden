@@ -65,6 +65,8 @@ else
     export EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" -DYUZU_USE_PRECOMPILED_HEADERS=OFF)
 fi
 
+EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" $@)
+
 echo "${EXTRA_CMAKE_FLAGS[@]}"
 
 mkdir -p build && cd build

@@ -17,6 +17,8 @@ fi
 
 [ -z "$WINDEPLOYQT" ] && { echo "WINDEPLOYQT environment variable required."; exit 1; }
 
+EXTRA_CMAKE_FLAGS=("${EXTRA_CMAKE_FLAGS[@]}" $@)
+
 echo "${EXTRA_CMAKE_FLAGS[@]}"
 
 mkdir -p build && cd build
