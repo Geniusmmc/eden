@@ -137,69 +137,65 @@ if (PLATFORM_FREEBSD)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib")
 endif()
 
-# Set bundled sdl2/qt as dependent options.
+# SDL2 / QT Frontend Options
+
 # On Linux system SDL2 is likely to be lacking HIDAPI support which have drawbacks but is needed for SDL motion
-CMAKE_DEPENDENT_OPTION(ENABLE_SDL2 "Enable the SDL2 frontend" ON "NOT ANDROID" OFF)
-
-# Let's avoid variables when using option
-if (MSVC OR ANDROID)
-    set(YUZU_USE_EXTERNAL_SDL2 ON)
-    set(YUZU_USE_CPM ON)
-    set(YUZU_USE_BUNDLED_FFMPEG ON)
-    set(YUZU_USE_PRECOMPILED_HEADERS ON)
-endif()
-
-CMAKE_DEPENDENT_OPTION(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" OFF "ENABLE_SDL2;NOT MSVC" OFF)
-
-cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "NOT ANDROID" OFF)
-
-cmake_dependent_option(ENABLE_OPENGL "Enable OpenGL" ON "NOT WIN32 OR NOT ARCHITECTURE_arm64" OFF)
-mark_as_advanced(FORCE ENABLE_OPENGL)
+cmake_dependent_option(ENABLE_SDL2 "Enable the SDL2 frontend" ON "NOT ANDROID" OFF)
+cmake_dependent_option(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" OFF "ENABLE_SDL2;NOT MSVC" OFF)
 
 option(ENABLE_QT "Enable the Qt frontend" ON)
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
 option(ENABLE_QT_UPDATE_CHECKER "Enable update checker for the Qt frontend" OFF)
+cmake_dependent_option(YUZU_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
 
-CMAKE_DEPENDENT_OPTION(YUZU_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
+option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
+option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+set(YUZU_QT_MIRROR "" CACHE STRING "Mirror URL for downloading bundled Qt libraries")
 
-option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc) if needed. Externals will still be fetched." OFF)
+# Core Build Options
+
+option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc.). Externals will still be fetched." OFF)
+option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" OFF)
+option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
+
+cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "NOT ANDROID" OFF)
+cmake_dependent_option(ENABLE_OPENGL "Enable OpenGL" ON "NOT WIN32 OR NOT ARCHITECTURE_arm64" OFF)
+mark_as_advanced(FORCE ENABLE_OPENGL)
+
+# Audio / Multimedia
+
+option(ENABLE_CUBEB "Enable cubeb audio backend" ON)
+
+# Web / Network Options
 
 option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
 option(ENABLE_WIFI_SCAN "Enable WiFi scanning" OFF)
 
-option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" OFF)
+cmake_dependent_option(USE_DISCORD_PRESENCE "Enable Discord Rich Presence" OFF "ENABLE_QT" OFF)
 
-option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
+# FFmpeg / Media Backend
 
-option(YUZU_USE_QT_WEB_ENGINE "Use QtWebEngine for web applet implementation" OFF)
+option(YUZU_USE_BUNDLED_FFMPEG "Download/build bundled FFmpeg" OFF)
 
-set(YUZU_QT_MIRROR "" CACHE STRING "What mirror to use for downloading the bundled Qt libraries")
+# Room / CLI Features
 
-option(ENABLE_CUBEB "Enables the cubeb audio backend" ON)
+cmake_dependent_option(YUZU_ROOM "Enable dedicated room functionality" ON "NOT ANDROID" OFF)
+cmake_dependent_option(YUZU_ROOM_STANDALONE "Enable standalone room executable" ON "YUZU_ROOM" OFF)
+cmake_dependent_option(YUZU_CMD "Compile the eden-cli executable" ON "ENABLE_SDL2;NOT ANDROID" OFF)
+cmake_dependent_option(YUZU_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
 
-CMAKE_DEPENDENT_OPTION(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF "ENABLE_QT" OFF)
-
-option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
-
-option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" OFF)
+# Android / CI Options
 
 # TODO(crueter): CI this?
-option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
-
+option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for Android" ON)
 option(FORCE_DOWNLOAD_WIN_BUNDLES "Forcefully download bundled Windows dependencies (useful for CI)" OFF)
 
-# TODO(crueter): Cleanup, each dep that has a bundled option should allow to choose between bundled, external, system
+# If using CPM and SDL2 is enabled, allow downloading bundled SDL2.
 if (YUZU_USE_CPM AND ENABLE_SDL2)
     option(YUZU_USE_BUNDLED_SDL2 "Download bundled SDL2 build" "${MSVC}")
 endif()
 
-CMAKE_DEPENDENT_OPTION(YUZU_ROOM "Enable dedicated room functionality" ON "NOT ANDROID" OFF)
-
-CMAKE_DEPENDENT_OPTION(YUZU_ROOM_STANDALONE "Enable standalone room executable" ON "YUZU_ROOM" OFF)
-
-CMAKE_DEPENDENT_OPTION(YUZU_CMD "Compile the eden-cli executable" ON "ENABLE_SDL2;NOT ANDROID" OFF)
-
-CMAKE_DEPENDENT_OPTION(YUZU_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
+# Optimization / Linking
 
 option(YUZU_ENABLE_LTO "Enable link-time optimization" OFF)
 if (YUZU_ENABLE_LTO)
@@ -208,13 +204,18 @@ if (YUZU_ENABLE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${COMPILER_SUPPORTS_LTO})
 endif()
 
+cmake_dependent_option(YUZU_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
+
+# Time Zone Options
+
 option(YUZU_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" ON)
-
-CMAKE_DEPENDENT_OPTION(YUZU_USE_FASTER_LD "Check if a faster linker is available" ON "NOT WIN32" OFF)
-
-CMAKE_DEPENDENT_OPTION(USE_SYSTEM_MOLTENVK "Use the system MoltenVK lib (instead of the bundled one)" OFF "APPLE" OFF)
-
 set(YUZU_TZDB_PATH "" CACHE STRING "Path to a pre-downloaded timezone database")
+
+# MoltenVK (Apple) Options
+
+cmake_dependent_option(USE_SYSTEM_MOLTENVK "Use the system MoltenVK library instead of the bundled one" OFF "APPLE" OFF)
+
+# SSL / OpenSSL Options
 
 set(DEFAULT_ENABLE_OPENSSL ON)
 if (ANDROID OR WIN32 OR APPLE OR PLATFORM_SUN)
@@ -232,9 +233,18 @@ if (ENABLE_WEB_SERVICE)
 endif()
 
 option(ENABLE_OPENSSL "Enable OpenSSL backend for ISslConnection" ${DEFAULT_ENABLE_OPENSSL})
-
 if (ENABLE_OPENSSL)
-    CMAKE_DEPENDENT_OPTION(YUZU_USE_BUNDLED_OPENSSL "Download bundled OpenSSL build" "${MSVC}" "NOT ANDROID" ON)
+    cmake_dependent_option(YUZU_USE_BUNDLED_OPENSSL "Download bundled OpenSSL build" "${MSVC}" "NOT ANDROID" ON)
+endif()
+
+# Compiler / Platform Specific Defaults
+
+# For MSVC or Android, enforce external SDL2, CPM, bundled FFmpeg, and precompiled headers.
+if (MSVC OR ANDROID)
+    set(YUZU_USE_EXTERNAL_SDL2 ON)
+    set(YUZU_USE_CPM ON)
+    set(YUZU_USE_BUNDLED_FFMPEG ON)
+    set(YUZU_USE_PRECOMPILED_HEADERS ON)
 endif()
 
 if (ANDROID AND YUZU_DOWNLOAD_ANDROID_VVL)
