@@ -141,13 +141,15 @@ endif()
 # On Linux system SDL2 is likely to be lacking HIDAPI support which have drawbacks but is needed for SDL motion
 CMAKE_DEPENDENT_OPTION(ENABLE_SDL2 "Enable the SDL2 frontend" ON "NOT ANDROID" OFF)
 
-set(EXT_DEFAULT OFF)
-
+# Let's avoid variables when using option
 if (MSVC OR ANDROID)
-    set(EXT_DEFAULT ON)
+    set(YUZU_USE_EXTERNAL_SDL2 ON)
+    set(YUZU_USE_CPM ON)
+    set(YUZU_USE_BUNDLED_FFMPEG ON)
+    set(YUZU_USE_PRECOMPILED_HEADERS ON)
 endif()
 
-CMAKE_DEPENDENT_OPTION(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" ${EXT_DEFAULT} "ENABLE_SDL2;NOT MSVC" OFF)
+CMAKE_DEPENDENT_OPTION(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" OFF "ENABLE_SDL2;NOT MSVC" OFF)
 
 cmake_dependent_option(ENABLE_LIBUSB "Enable the use of LibUSB" ON "NOT ANDROID" OFF)
 
@@ -160,12 +162,12 @@ option(ENABLE_QT_UPDATE_CHECKER "Enable update checker for the Qt frontend" OFF)
 
 CMAKE_DEPENDENT_OPTION(YUZU_USE_BUNDLED_QT "Download bundled Qt binaries" "${MSVC}" "ENABLE_QT" OFF)
 
-option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc) if needed. Externals will still be fetched." ${EXT_DEFAULT})
+option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc) if needed. Externals will still be fetched." OFF)
 
 option(ENABLE_WEB_SERVICE "Enable web services (telemetry, etc.)" ON)
 option(ENABLE_WIFI_SCAN "Enable WiFi scanning" OFF)
 
-option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" ${EXT_DEFAULT})
+option(YUZU_USE_BUNDLED_FFMPEG "Download/Build bundled FFmpeg" OFF)
 
 option(YUZU_USE_QT_MULTIMEDIA "Use QtMultimedia for Camera" OFF)
 
@@ -179,7 +181,7 @@ CMAKE_DEPENDENT_OPTION(USE_DISCORD_PRESENCE "Enables Discord Rich Presence" OFF 
 
 option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
 
-option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" ${EXT_DEFAULT})
+option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" OFF)
 
 # TODO(crueter): CI this?
 option(YUZU_DOWNLOAD_ANDROID_VVL "Download validation layer binary for android" ON)
@@ -200,14 +202,10 @@ CMAKE_DEPENDENT_OPTION(YUZU_CMD "Compile the eden-cli executable" ON "ENABLE_SDL
 CMAKE_DEPENDENT_OPTION(YUZU_CRASH_DUMPS "Compile crash dump (Minidump) support" OFF "WIN32 OR LINUX" OFF)
 
 option(YUZU_ENABLE_LTO "Enable link-time optimization" OFF)
-if(YUZU_ENABLE_LTO)
+if (YUZU_ENABLE_LTO)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT COMPILER_SUPPORTS_LTO)
-    if(COMPILER_SUPPORTS_LTO)
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-    else()
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
-    endif()
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${COMPILER_SUPPORTS_LTO})
 endif()
 
 option(YUZU_DOWNLOAD_TIME_ZONE_DATA "Always download time zone binaries" ON)
