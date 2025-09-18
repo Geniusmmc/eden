@@ -137,11 +137,18 @@ if (PLATFORM_FREEBSD)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/usr/local/lib")
 endif()
 
+# Cross Compile Options
+
+if (MSVC OR ANDROID)
+    option(YUZU_PREFER_EXTERNAL "Prefer building 'external' system libraries instead of bundled libraries" ON)
+endif()
+
 # SDL2 / QT Frontend Options
 
 # On Linux system SDL2 is likely to be lacking HIDAPI support which have drawbacks but is needed for SDL motion
-cmake_dependent_option(ENABLE_SDL2 "Enable the SDL2 frontend" ON "NOT ANDROID" OFF)
-cmake_dependent_option(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" OFF "ENABLE_SDL2;NOT MSVC" OFF)
+cmake_dependent_option(ENABLE_SDL2 "Enable the SDL2 frontend" OFF "ANDROID" ON)
+    cmake_dependent_option(YUZU_USE_EXTERNAL_SDL2 "Compile external SDL2" ON "ENABLE_SDL2;NOT MSVC" OFF)
+cmake_dependent_option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc.). Externals will still be fetched." OFF YUZU_PREFER_EXTERNAL ON)
 
 option(ENABLE_QT "Enable the Qt frontend" ON)
 option(ENABLE_QT_TRANSLATION "Enable translations for the Qt frontend" OFF)
@@ -154,7 +161,7 @@ set(YUZU_QT_MIRROR "" CACHE STRING "Mirror URL for downloading bundled Qt librar
 
 # Core Build Options
 
-option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc.). Externals will still be fetched." OFF)
+cmake_dependent_option(YUZU_USE_CPM "Use CPM to fetch system dependencies (fmt, boost, etc.). Externals will still be fetched." OFF YUZU_PREFER_EXTERNAL ON)
 option(YUZU_USE_PRECOMPILED_HEADERS "Use precompiled headers" OFF)
 option(YUZU_TESTS "Compile tests" "${BUILD_TESTING}")
 
@@ -199,8 +206,12 @@ endif()
 
 option(YUZU_ENABLE_LTO "Enable link-time optimization" OFF)
 if (YUZU_ENABLE_LTO)
+    cmake_policy(SET CMP0069 NEW)
     include(CheckIPOSupported)
     check_ipo_supported(RESULT COMPILER_SUPPORTS_LTO)
+    if(NOT COMPILER_SUPPORTS_LTO)
+        message(WARNING "LTO is not supported!")
+    endif()
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ${COMPILER_SUPPORTS_LTO})
 endif()
 
@@ -244,7 +255,6 @@ if (MSVC OR ANDROID)
     set(YUZU_USE_EXTERNAL_SDL2 ON)
     set(YUZU_USE_CPM ON)
     set(YUZU_USE_BUNDLED_FFMPEG ON)
-    set(YUZU_USE_PRECOMPILED_HEADERS ON)
 endif()
 
 if (ANDROID AND YUZU_DOWNLOAD_ANDROID_VVL)
