@@ -9,3 +9,7 @@ target_link_libraries(yuzu_room_standalone PRIVATE yuzu-room)
 if(UNIX AND NOT APPLE)
     install(TARGETS yuzu_room_standalone RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin")
 endif()
+
+if (YUZU_ENABLE_LTO)
+    set_property(TARGET yuzu_room_standalone PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
