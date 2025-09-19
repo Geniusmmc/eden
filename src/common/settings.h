@@ -643,6 +643,8 @@ struct Values {
 
     // Linux
     SwitchableSetting<bool> enable_gamemode{linkage, true, "enable_gamemode", Category::Linux};
+    SwitchableSetting<bool> force_x11{linkage, false, "force_x11", Category::Linux};
+    Setting<bool> hide_backend_warning_popup{linkage, false, "hide_backend_warning_popup", Category::Linux};
 
     // Controls
     InputSetting<std::array<PlayerInput, 10>> players;

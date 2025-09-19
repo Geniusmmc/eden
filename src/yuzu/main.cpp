@@ -545,6 +545,10 @@ GMainWindow::GMainWindow(bool has_broken_vulkan)
     // Gen keys if necessary
     OnCheckFirmwareDecryption();
 
+#ifdef __unix__
+    OnCheckBackend();
+#endif
+
     game_list->LoadCompatibilityList();
     // force reload on first load to ensure add-ons get updated
     game_list->PopulateAsync(UISettings::values.game_dirs);
@@ -4454,6 +4458,49 @@ void GMainWindow::OnCheckFirmwareDecryption() {
     UpdateMenuState();
 }
 
+#ifdef __unix__
+void GMainWindow::OnCheckBackend() {
+    QByteArray qtPlatform = qgetenv("QT_QPA_PLATFORM");
+    bool isWayland = qtPlatform.isEmpty() || qtPlatform == "wayland" || qtPlatform == "wayland-egl";
+
+    if (!isWayland)
+        return;
+
+    const bool currently_hidden = Settings::values.hide_backend_warning_popup.GetValue();
+    if (currently_hidden)
+        return;
+
+    QMessageBox msgbox(this);
+    msgbox.setWindowTitle(tr("Wayland Detected"));
+    msgbox.setText(tr("You are running Eden under Wayland.\n"
+                      "Some features may not work correctly.\n"
+                      "It is recommended to use X11 for the best compatibility."));
+    msgbox.setIcon(QMessageBox::Warning);
+
+    QPushButton* okButton = msgbox.addButton(tr("Use X11"), QMessageBox::AcceptRole);
+    QPushButton* cancelButton = msgbox.addButton(tr("Continue with Wayland"), QMessageBox::RejectRole);
+    msgbox.setDefaultButton(okButton);
+
+    QCheckBox* cb = new QCheckBox(tr("Don't show again"), &msgbox);
+    cb->setChecked(currently_hidden);
+    msgbox.setCheckBox(cb);
+
+    msgbox.exec();
+
+    const bool hide = cb->isChecked();
+    if (hide != currently_hidden) {
+        Settings::values.hide_backend_warning_popup.SetValue(hide);
+    }
+
+    if (msgbox.clickedButton() == okButton) {
+        Settings::values.force_x11.SetValue(true);
+        QMessageBox::information(this,
+            tr("Restart Required"),
+            tr("Restart Eden to apply the X11 backend."));
+    }
+}
+#endif
+
 bool GMainWindow::CheckFirmwarePresence() {
     return FirmwareManager::CheckFirmwarePresence(*QtCommon::system.get());
 }
@@ -4943,6 +4990,12 @@ int main(int argc, char* argv[]) {
     if (QString::fromLocal8Bit(qgetenv("DISPLAY")).isEmpty()) {
         qputenv("DISPLAY", ":0");
     }
+
+    // TODO: (DraVee) Un-alive the guy who wrote this
+    const auto config_path = Common::FS::PathToUTF8String(Common::FS::GetEdenPath(Common::FS::EdenPath::ConfigDir) / "qt-config.ini");
+    const bool forceX11 = QSettings(QString::fromStdString(config_path), QSettings::IniFormat).value("Linux/force_x11", false).toBool();
+    if (forceX11)
+        qputenv("QT_QPA_PLATFORM", "xcb");
 
     // Fix the Wayland appId. This needs to match the name of the .desktop file without the .desktop
     // suffix.
