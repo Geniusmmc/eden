@@ -1,14 +1,14 @@
-name: Build Eden on macOS
+name: Build Eden on macOS 14 (Sonoma)
 
 on:
   push:
-    branches: [ macos ]  # Trigger on pushes to the 'macos' branch; adjust as needed
+    branches: [ macos ]  # 你可以改成你需要的分支
   pull_request:
     branches: [ macos ]
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-14  # 指定 macOS 14 Sonoma，相当于 mac26
 
     steps:
     - name: Checkout repository
@@ -16,10 +16,11 @@ jobs:
 
     - name: Install dependencies via Homebrew
       run: |
-        brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools
+        brew update
+        brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake catch2 molten-vk vulkan-loader spirv-tools
 
     - name: Install Xcode command line tools
-      run: xcode-select --install || true  # Install if not already present
+      run: xcode-select --install || true
 
     - name: Configure CMake
       run: |
@@ -33,4 +34,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: eden-macos-build
-        path: build/bin/  # Adjust path to where the built executable/app is located (e.g., build/bin/eden.app or similar)
+        path: build/bin/  # 根据实际 Eden 可执行文件路径调整
