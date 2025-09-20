@@ -54,54 +54,7 @@ jobs:
         with:
           retention-days: 2
           name: macos.zip
-          path: artifacts/*.zipname: Build Eden on macOS
-
-on:
-  push:
-    branches: [ macos ]
-  pull_request:
-    branches: [ macos ]
-
-permissions:
-  contents: write
-
-jobs:
-  macos:
-    runs-on: macos-latest
-    env:
-      CCACHE_DIR: ${{ github.workspace }}/.cache/ccache
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
-      OS: macos
-      TARGET: release
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Install Xcode command line tools
-        run: xcode-select --install || true
-
-      - name: Install dependencies via Homebrew
-        run: |
-          if [[ $(uname -m) == "arm64" ]]; then
-            export PATH="/opt/homebrew/bin:$PATH"
-            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet
-          else
-            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet
-          fi
-
-      - name: Configure CMake
-        run: |
-          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6 -DENABLE_WEB_SERVICE=OFF
-
-      - name: Build
-        run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
-
-      - name: Package macOS artifacts
-        run: |
+          path: artifacts/*.zip        run: |
           mkdir -p artifacts
           ditto -c -k --sequester --keepParent build/bin/eden.app artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip
 
