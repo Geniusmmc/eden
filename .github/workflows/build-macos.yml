@@ -1,37 +1,52 @@
-name: Build Eden on macOS 14 (Sonoma)
+name: Build Eden on macOS
 
 on:
   push:
-    branches: [ macos ]  # 你可以改成你需要的分支
+    branches: [ macos ]
   pull_request:
     branches: [ macos ]
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    runs-on: macos-14  # 指定 macOS 14 Sonoma，相当于 mac26
-
+    runs-on: macos-latest
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.cache/ccache  # ← 已修复：使用 github.workspace
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
+      OS: macos
+      TARGET: release
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          fetch-tags: true
 
-    - name: Install dependencies via Homebrew
-      run: |
-        brew update
-        brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake catch2 molten-vk vulkan-loader spirv-tools
+      - name: Install Xcode command line tools
+        run: xcode-select --install || true
 
-    - name: Install Xcode command line tools
-      run: xcode-select --install || true
+      - name: Install dependencies via Homebrew
+        run: |
+          brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools
 
-    - name: Configure CMake
-      run: |
-        cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF
 
-    - name: Build
-      run: |
-        cmake --build build --config Release
+      - name: Build
+        run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
 
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: eden-macos-build
-        path: build/bin/  # 根据实际 Eden 可执行文件路径调整
+      - name: Package macOS artifacts
+        run: |
+          mkdir -p artifacts
+          ditto -c -k --sequester --keepParent build/bin/eden.app artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip
+
+      - name: Upload macOS artifacts
+        uses: forgejo/upload-artifact@v4  # 或 actions/upload-artifact@v4
+        with:
+          retention-days: 2
+          name: macos.zip
+          path: artifacts/*.zip
