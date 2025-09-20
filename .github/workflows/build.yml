@@ -39,7 +39,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6 -DENABLE_WEB_SERVICE=OFF  # 添加禁用 Web 服务选项
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6 -DENABLE_WEB_SERVICE=OFF
 
       - name: Build
         run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
