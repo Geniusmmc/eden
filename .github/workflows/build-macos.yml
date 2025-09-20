@@ -1,0 +1,36 @@
+name: Build Eden on macOS
+
+on:
+  push:
+    branches: [ macos ]  # Trigger on pushes to the 'macos' branch; adjust as needed
+  pull_request:
+    branches: [ macos ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies via Homebrew
+      run: |
+        brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools
+
+    - name: Install Xcode command line tools
+      run: xcode-select --install || true  # Install if not already present
+
+    - name: Configure CMake
+      run: |
+        cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF
+
+    - name: Build
+      run: |
+        cmake --build build --config Release
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: eden-macos-build
+        path: build/bin/  # Adjust path to where the built executable/app is located (e.g., build/bin/eden.app or similar)
