@@ -20,7 +20,7 @@ jobs:
       - name: Pack
         run: ./.ci/source.sh
       - name: Upload
-        uses: forgejo/upload-artifact@v4
+        uses: actions/upload-artifact@v4  # 修复：替换 forgejo
         with:
           retention-days: 2
           name: source.zip
@@ -35,7 +35,7 @@ jobs:
       run:
         shell: ${{ (matrix.target == 'msys2' && 'msys2') || 'bash' }} {0}
     env:
-      CCACHE_DIR: ${{ github.workspace }}/.cache/.ccache  # 修复：使用 github.workspace
+      CCACHE_DIR: ${{ github.workspace }}/.cache/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
       OS: windows
@@ -54,7 +54,7 @@ jobs:
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/build/externals
             ${{ github.workspace }}/.vcpkg
-          key: windows-${{ matrix.target }}-vcpkg-${{ hashFiles('**/CMakeLists.txt', '**/vcpkg.json') }}-${{ github.run_id }}  # 修复：硬编码 'windows'
+          key: windows-${{ matrix.target }}-vcpkg-${{ hashFiles('**/CMakeLists.txt', '**/vcpkg.json') }}-${{ github.run_id }}
           restore-keys: |
             windows-${{ matrix.target }}-vcpkg-
 
@@ -79,7 +79,7 @@ jobs:
           ./.ci/windows/package.sh
 
       - name: Upload Windows artifacts
-        uses: forgejo/upload-artifact@v4
+        uses: actions/upload-artifact@v4  # 修复：替换 forgejo
         with:
           retention-days: 2
           name: ${{ matrix.target }}.zip
@@ -107,7 +107,7 @@ jobs:
         run: DEVEL=true ./.ci/linux/package.sh &> /dev/null
 
       - name: Upload Linux artifacts
-        uses: forgejo/upload-artifact@v4
+        uses: actions/upload-artifact@v4  # 修复：替换 forgejo
         with:
           retention-days: 2
           name: linux.zip
@@ -116,7 +116,7 @@ jobs:
   android:
     runs-on: android
     env:
-      CCACHE_DIR: /home/runner/.cache/ccache  # 添加 CCACHE 一致性
+      CCACHE_DIR: /home/runner/.cache/ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
       OS: android
@@ -146,7 +146,7 @@ jobs:
         run: ./.ci/android/package.sh
 
       - name: Upload Android artifacts
-        uses: forgejo/upload-artifact@v4
+        uses: actions/upload-artifact@v4  # 修复：替换 forgejo
         with:
           retention-days: 2
           name: android.zip
@@ -155,7 +155,7 @@ jobs:
   macos:
     runs-on: macos-latest
     env:
-      CCACHE_DIR: ${{ github.workspace }}/.cache/ccache  # 兼容 Forgejo
+      CCACHE_DIR: ${{ github.workspace }}/.cache/ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
       OS: macos
@@ -172,7 +172,6 @@ jobs:
 
       - name: Install dependencies via Homebrew
         run: |
-          # 处理 ARM/Intel 兼容
           if [[ $(uname -m) == "arm64" ]]; then
             export PATH="/opt/homebrew/bin:$PATH"
             brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools
@@ -182,7 +181,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6  # Qt 路径
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6
 
       - name: Build
         run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
@@ -193,7 +192,7 @@ jobs:
           ditto -c -k --sequester --keepParent build/bin/eden.app artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip
 
       - name: Upload macOS artifacts
-        uses: forgejo/upload-artifact@v4
+        uses: actions/upload-artifact@v4  # 修复：替换 forgejo
         with:
           retention-days: 2
           name: macos.zip
