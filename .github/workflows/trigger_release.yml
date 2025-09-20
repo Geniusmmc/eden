@@ -32,7 +32,7 @@ jobs:
       run:
         shell: ${{ (matrix.target == 'msys2' && 'msys2') || 'bash' }} {0}
     env:
-      CCACHE_DIR: ${{ runner.workspace }}/.cache/.ccache
+      CCACHE_DIR: ${{ github.workspace }}/.cache/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
       OS: windows
@@ -51,9 +51,9 @@ jobs:
             ${{ github.workspace }}/build/vcpkg_installed
             ${{ github.workspace }}/build/externals
             ${{ github.workspace }}/.vcpkg
-          key: ${{ runner.os }}-${{ matrix.target }}-vcpkg-${{ hashFiles('**/CMakeLists.txt', '**/vcpkg.json') }}-${{ github.run_id }}
+          key: ${{ env.RUNNER_OS }}-${{ matrix.target }}-vcpkg-${{ hashFiles('**/CMakeLists.txt', '**/vcpkg.json') }}-${{ github.run_id }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.target }}-vcpkg-
+            ${{ env.RUNNER_OS }}-${{ matrix.target }}-vcpkg-
 
       - name: Set up MSVC
         uses: https://github.com/ilammy/msvc-dev-cmd@v1
@@ -152,7 +152,7 @@ jobs:
   macos:
     runs-on: macos-latest
     env:
-      CCACHE_DIR: ${{ runner.workspace }}/.cache/ccache
+      CCACHE_DIR: ${{ github.workspace }}/.cache/ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
       OS: macos
