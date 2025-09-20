@@ -1,8 +1,8 @@
 name: Build Application and Make Release
 
-#on:
-#  push:
-#    tags: [ "*" ]
+on:
+  push:
+    tags: [ "*" ]  # 取消注释：触发于 tag push
 
 permissions:
   contents: write
