@@ -149,8 +149,51 @@ jobs:
           name: android.zip
           path: artifacts/*
 
+  macos:
+    runs-on: macos-latest
+    env:
+      CCACHE_DIR: ${{ runner.workspace }}/.cache/ccache
+      CCACHE_COMPILERCHECK: content
+      CCACHE_SLOPPINESS: time_macros
+      OS: macos
+      TARGET: release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Install Xcode command line tools
+        run: xcode-select --install || true
+
+      - name: Install dependencies via Homebrew
+        run: |
+          brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
+
+      - name: Package macOS artifacts
+        run: |
+          # 假设打包脚本或手动 zip eden.app；如有 .ci/macos/package.sh，请替换
+          mkdir -p artifacts
+          ditto -c -k --sequester --keepParent build/bin/eden.app artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip
+          # 或使用 zip: zip -r artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip build/bin/eden.app
+
+      - name: Upload macOS artifacts
+        uses: forgejo/upload-artifact@v4
+        with:
+          retention-days: 2
+          name: macos.zip
+          path: artifacts/*.zip
+
   create_release:
-    needs: [linux, windows, android]
+    needs: [source, linux, windows, android, macos]  # 添加 macos
     runs-on: linux
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
@@ -192,6 +235,8 @@ jobs:
           cp android.zip/eden-android*.aab dist/Eden-Android-${{ env.VERSION }}.aab
           cp source.zip/eden-unified-source*.tar.xz dist/Eden-Source-${{ env.VERSION }}.tar.xz
           cp source.zip/eden-unified-source*.tar.xz.sha256sum dist/Eden-Source-${{ env.VERSION }}.tar.xz.sha256sum
+          # 添加 macOS
+          cp macos.zip/Eden-macOS-*.zip dist/Eden-macOS-${{ env.VERSION }}-x64.zip
 
       - name: Create release
         id: create_release
