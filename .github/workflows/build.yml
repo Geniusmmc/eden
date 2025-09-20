@@ -54,13 +54,4 @@ jobs:
         with:
           retention-days: 2
           name: macos.zip
-          path: artifacts/*.zip        run: |
-          mkdir -p artifacts
-          ditto -c -k --sequester --keepParent build/bin/eden.app artifacts/Eden-macOS-${{ github.ref_name }}-x64.zip
-
-      - name: Upload macOS artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          retention-days: 2
-          name: macos.zip
           path: artifacts/*.zip
