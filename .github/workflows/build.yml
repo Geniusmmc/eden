@@ -32,16 +32,14 @@ jobs:
         run: |
           if [[ $(uname -m) == "arm64" ]]; then
             export PATH="/opt/homebrew/bin:$PATH"
-            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet  # 添加 enet
-            # 可选：brew install llvm  # 如果需要 LLVM 支持
+            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet
           else
-            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet  # 添加 enet
-            # 可选：brew install llvm
+            brew install autoconf automake boost ffmpeg fmt glslang hidapi libtool libusb lz4 ninja nlohmann-json openssl pkg-config qt@6 sdl2 speexdsp zlib zstd cmake Catch2 molten-vk vulkan-loader spirv-tools enet
           fi
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release -DYUZU_TESTS=OFF -DCMAKE_PREFIX_PATH=/opt/homebrew/opt/qt@6/lib/cmake/Qt6 -DENABLE_WEB_SERVICE=OFF  # 添加禁用 Web 服务选项
 
       - name: Build
         run: cmake --build build --config Release -j$(sysctl -n hw.ncpu)
