@@ -23,7 +23,7 @@
 #include "qt_common/uisettings.h"
 #include "qt_common/qt_game_util.h"
 #include "yuzu/compatibility_list.h"
-#include "yuzu/play_time_manager.h"
+#include "common/play_time_manager.h"
 
 namespace Core {
 class System;

@@ -206,6 +206,16 @@ object NativeLibrary {
         ErrorUnknown
     }
 
+    /**
+     *  playtime tracking
+     */
+    external fun playTimeManagerInit()
+    external fun playTimeManagerStart()
+    external fun playTimeManagerStop()
+    external fun playTimeManagerGetPlayTime(programId: String): Long
+    external fun playTimeManagerGetCurrentTitleId(): Long
+    external fun playTimeManagerResetProgramPlayTime(programId: String)
+
     var coreErrorAlertResult = false
     val coreErrorAlertLock = Object()
 

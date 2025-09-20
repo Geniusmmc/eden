@@ -163,7 +163,7 @@ static FileSys::VirtualFile VfsDirectoryCreateFileWrapper(const FileSys::Virtual
 #include "yuzu/install_dialog.h"
 #include "yuzu/loading_screen.h"
 #include "yuzu/main.h"
-#include "yuzu/play_time_manager.h"
+#include "common/play_time_manager.h"
 #include "yuzu/startup_checks.h"
 #include "qt_common/uisettings.h"
 #include "yuzu/util/clickable_label.h"
@@ -447,7 +447,7 @@ GMainWindow::GMainWindow(bool has_broken_vulkan)
     SetDiscordEnabled(UISettings::values.enable_discord_presence.GetValue());
     discord_rpc->Update();
 
-    play_time_manager = std::make_unique<PlayTime::PlayTimeManager>(QtCommon::system->GetProfileManager());
+    play_time_manager = std::make_unique<PlayTime::PlayTimeManager>();
 
     Network::Init();
 

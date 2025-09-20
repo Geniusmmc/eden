@@ -6,8 +6,6 @@
 
 #pragma once
 
-#include <QString>
-
 #include <map>
 
 #include "common/common_funcs.h"
@@ -27,7 +25,7 @@ using PlayTimeDatabase = std::map<ProgramId, PlayTime>;
 
 class PlayTimeManager {
 public:
-    explicit PlayTimeManager(Service::Account::ProfileManager& profile_manager);
+    explicit PlayTimeManager();
     ~PlayTimeManager();
 
     YUZU_NON_COPYABLE(PlayTimeManager);
@@ -46,9 +44,7 @@ private:
     PlayTimeDatabase database;
     u64 running_program_id;
     std::jthread play_time_thread;
-    Service::Account::ProfileManager& manager;
 };
 
-QString ReadablePlayTime(qulonglong time_seconds);
 
 } // namespace PlayTime

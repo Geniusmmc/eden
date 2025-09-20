@@ -27,3 +27,6 @@
  * @return bool If the operation succeeded
  */
 [[nodiscard]] bool SaveIconToFile(const std::filesystem::path& icon_path, const QImage& image);
+
+// Converts a length of time in seconds into a readable format
+QString ReadableDuration(qulonglong time_seconds);

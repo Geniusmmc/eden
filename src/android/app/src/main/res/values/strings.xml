@@ -1603,4 +1603,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </string>
+    <string name="playtime_format">Playtime: %1$d h, %2$d m</string>
+    <string name="reset_playtime">Clear Playtime</string>
+    <string name="reset_playtime_description">Reset the current game\'s playtime back to 0 seconds</string>
+    <string name="reset_playtime_warning_description">This will clear the current game\'s playtime data. Are you sure?</string>
+    <string name="playtime_reset_successfully">Playtime has been reset</string>
 </resources>

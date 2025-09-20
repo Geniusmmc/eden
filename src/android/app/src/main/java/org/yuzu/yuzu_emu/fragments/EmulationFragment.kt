@@ -1616,6 +1616,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 Log.debug("[EmulationFragment] Pausing emulation.")
 
                 NativeLibrary.pauseEmulation()
+                NativeLibrary.playTimeManagerStop()
 
                 state = State.PAUSED
             } else {
@@ -1706,6 +1707,7 @@ class EmulationFragment : Fragment(), SurfaceHolder.Callback {
                 State.PAUSED -> {
                     Log.debug("[EmulationFragment] Resuming emulation.")
                     NativeLibrary.unpauseEmulation()
+                    NativeLibrary.playTimeManagerStart()
                 }
 
                 else -> Log.debug("[EmulationFragment] Bug, run called while already running.")
